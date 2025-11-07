@@ -223,7 +223,7 @@
 		</div>
 	{:else}
 		<!-- Workouts List -->
-		<div class="space-y-6">
+		<div class="space-y-4 sm:space-y-6">
 			{#each workouts as workout (workout.id)}
 				{@const stats = getCompletedSets(workout)}
 				{@const isComplete = isWorkoutComplete(workout)}
@@ -235,20 +235,25 @@
 				>
 					<!-- Workout Header -->
 					<div
-						class="border-b px-6 py-4"
+						class="border-b px-4 py-3 sm:px-6 sm:py-4"
 						class:bg-green-50={isComplete}
 						class:border-green-200={isComplete}
 						class:bg-gray-50={!isComplete}
 						class:border-gray-200={!isComplete}
 					>
-						<div class="flex items-center justify-between">
-							<div class="flex items-center gap-3">
-								<h2 class="text-2xl font-bold text-gray-900">{workout.name}</h2>
+						<div class="flex items-center justify-between gap-2">
+							<div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+								<h2 class="truncate text-xl font-bold text-gray-900 sm:text-2xl">{workout.name}</h2>
 								{#if isComplete}
 									<span
-										class="flex items-center gap-1 rounded-full bg-green-600 px-3 py-1 text-sm font-medium text-white"
+										class="flex flex-shrink-0 items-center gap-1 rounded-full bg-green-600 px-2 py-0.5 text-xs font-medium text-white sm:px-3 sm:py-1 sm:text-sm"
 									>
-										<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<svg
+											class="h-3 w-3 sm:h-4 sm:w-4"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
 											<path
 												stroke-linecap="round"
 												stroke-linejoin="round"
@@ -256,13 +261,13 @@
 												d="M5 13l4 4L19 7"
 											/>
 										</svg>
-										Complete
+										<span class="hidden sm:inline">Complete</span>
 									</span>
 								{/if}
 							</div>
 							<button
 								onclick={() => handleEditWorkout(workout)}
-								class="rounded-lg p-2 text-gray-600 hover:bg-gray-200"
+								class="flex-shrink-0 rounded-lg p-2 text-gray-600 hover:bg-gray-200"
 								aria-label="Edit workout"
 							>
 								<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -294,10 +299,10 @@
 
 					<!-- Workout Notes -->
 					{#if workout.notes}
-						<div class="border-b border-gray-200 bg-blue-50 px-6 py-3">
+						<div class="border-b border-gray-200 bg-blue-50 px-4 py-3 sm:px-6">
 							<p class="text-sm text-gray-700">
 								<span class="font-semibold text-gray-900">Workout Notes:</span>
-								{workout.notes}
+								<span class="break-words">{workout.notes}</span>
 							</p>
 						</div>
 					{/if}
@@ -312,15 +317,15 @@
 								total: exercise.sets.length
 							}}
 							{@const isExerciseComplete = exerciseStats.completed === exerciseStats.total}
-							<div class="px-6 py-4">
+							<div class="px-4 py-3 sm:px-6 sm:py-4">
 								<!-- Exercise Header (Collapsible) -->
 								<button
 									onclick={() => toggleExercise(workout.id!, exerciseIndex)}
-									class="flex w-full items-center justify-between gap-3 text-left"
+									class="flex w-full items-center justify-between gap-2 text-left sm:gap-3"
 								>
-									<div class="flex flex-1 items-center gap-3">
+									<div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
 										<svg
-											class="h-5 w-5 flex-shrink-0 text-gray-500 transition-transform"
+											class="h-4 w-4 flex-shrink-0 text-gray-500 transition-transform sm:h-5 sm:w-5"
 											class:rotate-90={isExpanded}
 											fill="none"
 											stroke="currentColor"
@@ -333,10 +338,12 @@
 												d="M9 5l7 7-7 7"
 											/>
 										</svg>
-										<h3 class="text-lg font-semibold text-gray-900">{exercise.exerciseName}</h3>
+										<h3 class="truncate text-base font-semibold text-gray-900 sm:text-lg">
+											{exercise.exerciseName}
+										</h3>
 										{#if isExerciseComplete}
 											<span
-												class="flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700"
+												class="flex flex-shrink-0 items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700"
 											>
 												<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 													<path
@@ -346,12 +353,12 @@
 														d="M5 13l4 4L19 7"
 													/>
 												</svg>
-												Done
+												<span class="hidden sm:inline">Done</span>
 											</span>
 										{/if}
 									</div>
-									<span class="text-sm text-gray-600">
-										{exerciseStats.completed}/{exerciseStats.total} sets
+									<span class="flex-shrink-0 text-xs text-gray-600 sm:text-sm">
+										{exerciseStats.completed}/{exerciseStats.total}
 									</span>
 								</button>
 
@@ -384,14 +391,14 @@
 										<div class="space-y-2">
 											{#each exercise.sets as set, setIndex (setIndex)}
 												<div
-													class="flex items-center justify-between rounded-lg border p-3 transition-colors"
+													class="flex flex-col gap-2 rounded-lg border p-2 transition-colors sm:flex-row sm:items-center sm:justify-between sm:p-3"
 													class:border-green-500={set.completed}
 													class:bg-green-50={set.completed}
 													class:border-gray-300={!set.completed}
 													class:bg-white={!set.completed}
 												>
-													<!-- Left side: Checkbox and Label -->
-													<div class="flex items-center gap-3">
+													<!-- Top/Left: Checkbox and Label -->
+													<div class="flex items-center gap-2 sm:gap-3">
 														<button
 															onclick={() => toggleSetComplete(workout, exerciseIndex, setIndex)}
 															class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors"
@@ -417,13 +424,15 @@
 																</svg>
 															{/if}
 														</button>
-														<span class="font-medium text-gray-900">Set {setIndex + 1}</span>
+														<span class="text-sm font-medium text-gray-900 sm:text-base">
+															Set {setIndex + 1}
+														</span>
 													</div>
 
-													<!-- Right side: Inputs -->
-													<div class="flex items-center gap-3">
+													<!-- Bottom/Right: Inputs -->
+													<div class="flex items-center gap-2 sm:gap-3">
 														<!-- Weight Input -->
-														<div class="flex items-center gap-2">
+														<div class="flex flex-1 items-center gap-1.5 sm:flex-none sm:gap-2">
 															<input
 																type="number"
 																value={set.weight}
@@ -436,17 +445,17 @@
 																		Number(e.currentTarget.value)
 																	)}
 																onclick={(e) => e.stopPropagation()}
-																class="w-20 rounded border border-gray-300 px-2 py-1 text-center text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+																class="w-full rounded border border-gray-300 px-2 py-1.5 text-center text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none sm:w-20"
 																class:border-green-500={set.completed}
 																class:bg-white={set.completed}
 																min="0"
 																step="5"
 															/>
-															<span class="text-sm text-gray-600">lbs</span>
+															<span class="text-xs text-gray-600 sm:text-sm">lbs</span>
 														</div>
 
 														<!-- Reps Input -->
-														<div class="flex items-center gap-2">
+														<div class="flex flex-1 items-center gap-1.5 sm:flex-none sm:gap-2">
 															<input
 																type="number"
 																value={set.reps}
@@ -459,7 +468,7 @@
 																		Number(e.currentTarget.value)
 																	)}
 																onclick={(e) => e.stopPropagation()}
-																class="w-16 rounded border border-gray-300 px-2 py-1 text-center text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+																class="w-full rounded border border-gray-300 px-2 py-1.5 text-center text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none sm:w-16"
 																class:border-green-500={set.completed}
 																class:bg-white={set.completed}
 																min="0"

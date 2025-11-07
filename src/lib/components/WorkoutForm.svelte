@@ -106,7 +106,7 @@
 
 <!-- Modal Backdrop -->
 <div
-	class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm"
+	class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-0 backdrop-blur-sm sm:p-4"
 	onclick={handleBackdropClick}
 	onkeydown={(e) => e.key === 'Escape' && onCancel()}
 	role="dialog"
@@ -116,18 +116,18 @@
 >
 	<!-- Modal Content -->
 	<div
-		class="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-lg bg-white shadow-xl"
+		class="flex h-full w-full max-w-2xl flex-col bg-white shadow-xl sm:h-auto sm:max-h-[90vh] sm:rounded-lg"
 		role="document"
 	>
 		<!-- Modal Header (Fixed) -->
-		<div class="flex-shrink-0 border-b border-gray-200 px-6 py-4">
-			<h2 id="form-title" class="text-2xl font-bold">
+		<div class="flex-shrink-0 border-b border-gray-200 px-4 py-3 sm:px-6 sm:py-4">
+			<h2 id="form-title" class="text-xl font-bold sm:text-2xl">
 				{workout ? 'Edit Workout' : 'Add Workout'} - {date}
 			</h2>
 		</div>
 
 		<!-- Modal Body (Scrollable) -->
-		<div bind:this={modalBodyRef} class="flex-1 overflow-y-auto px-6 py-4">
+		<div bind:this={modalBodyRef} class="flex-1 overflow-y-auto px-4 py-3 sm:px-6 sm:py-4">
 			<form
 				onsubmit={(e) => {
 					e.preventDefault();
@@ -293,7 +293,7 @@
 		</div>
 
 		<!-- Modal Footer (Fixed) -->
-		<div class="flex-shrink-0 border-t border-gray-200 px-6 py-4">
+		<div class="flex-shrink-0 border-t border-gray-200 px-4 py-3 sm:px-6 sm:py-4">
 			<div class="flex justify-end gap-3">
 				<button
 					type="button"

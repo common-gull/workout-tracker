@@ -62,7 +62,7 @@
 
 <!-- Modal Backdrop -->
 <div
-	class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm"
+	class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-0 backdrop-blur-sm sm:p-4"
 	onclick={handleBackdropClick}
 	onkeydown={(e) => e.key === 'Escape' && onCancel()}
 	role="dialog"
@@ -71,85 +71,92 @@
 	tabindex="-1"
 >
 	<!-- Modal Content -->
-	<div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl" role="document">
-		<h2 id="form-title" class="mb-4 text-2xl font-bold">
-			{exercise ? 'Edit Exercise' : 'Add Exercise'}
-		</h2>
+	<div
+		class="flex h-full w-full max-w-md flex-col bg-white shadow-xl sm:h-auto sm:rounded-lg sm:p-6"
+		role="document"
+	>
+		<div class="flex-1 overflow-y-auto p-4 sm:p-0">
+			<h2 id="form-title" class="mb-4 text-xl font-bold sm:text-2xl">
+				{exercise ? 'Edit Exercise' : 'Add Exercise'}
+			</h2>
 
-		<form
-			onsubmit={(e) => {
-				e.preventDefault();
-				handleSubmit();
-			}}
-		>
-			<!-- Name -->
-			<div class="mb-4">
-				<label for="name" class="mb-1 block text-sm font-medium text-gray-700">
-					Exercise Name *
-				</label>
-				<input
-					id="name"
-					type="text"
-					bind:value={name}
-					placeholder="e.g. Bench Press"
-					class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-					class:border-red-500={errors.name}
-				/>
-				{#if errors.name}
-					<p class="mt-1 text-sm text-red-600">{errors.name}</p>
-				{/if}
-			</div>
+			<form
+				onsubmit={(e) => {
+					e.preventDefault();
+					handleSubmit();
+				}}
+			>
+				<!-- Name -->
+				<div class="mb-4">
+					<label for="name" class="mb-1 block text-sm font-medium text-gray-700">
+						Exercise Name *
+					</label>
+					<input
+						id="name"
+						type="text"
+						bind:value={name}
+						placeholder="e.g. Bench Press"
+						class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+						class:border-red-500={errors.name}
+					/>
+					{#if errors.name}
+						<p class="mt-1 text-sm text-red-600">{errors.name}</p>
+					{/if}
+				</div>
 
-			<!-- Description -->
-			<div class="mb-4">
-				<label for="description" class="mb-1 block text-sm font-medium text-gray-700">
-					Description *
-				</label>
-				<textarea
-					id="description"
-					bind:value={description}
-					placeholder="Describe the exercise..."
-					rows="3"
-					class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-					class:border-red-500={errors.description}
-				></textarea>
-				{#if errors.description}
-					<p class="mt-1 text-sm text-red-600">{errors.description}</p>
-				{/if}
-			</div>
+				<!-- Description -->
+				<div class="mb-4">
+					<label for="description" class="mb-1 block text-sm font-medium text-gray-700">
+						Description *
+					</label>
+					<textarea
+						id="description"
+						bind:value={description}
+						placeholder="Describe the exercise..."
+						rows="3"
+						class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+						class:border-red-500={errors.description}
+					></textarea>
+					{#if errors.description}
+						<p class="mt-1 text-sm text-red-600">{errors.description}</p>
+					{/if}
+				</div>
 
-			<!-- Video Link -->
-			<div class="mb-6">
-				<label for="videoLink" class="mb-1 block text-sm font-medium text-gray-700">
-					Video Link (optional)
-				</label>
-				<input
-					id="videoLink"
-					type="url"
-					bind:value={videoLink}
-					placeholder="https://youtube.com/watch?v=..."
-					class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-				/>
-			</div>
+				<!-- Video Link -->
+				<div class="mb-6">
+					<label for="videoLink" class="mb-1 block text-sm font-medium text-gray-700">
+						Video Link (optional)
+					</label>
+					<input
+						id="videoLink"
+						type="url"
+						bind:value={videoLink}
+						placeholder="https://youtube.com/watch?v=..."
+						class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+					/>
+				</div>
 
-			<!-- Actions -->
-			<div class="flex justify-end gap-3">
-				<button
-					type="button"
-					onclick={onCancel}
-					disabled={saving}
-					class="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+				<!-- Actions -->
+				<div
+					class="mt-6 flex justify-end gap-3 border-t border-gray-200 pt-4 sm:mt-0 sm:border-t-0 sm:pt-0"
 				>
-					Cancel
-				</button>
-				<button
-					type="submit"
-					disabled={saving}
-					class="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
-				>
-					{saving ? 'Saving...' : exercise ? 'Update' : 'Add'}
-				</button>
-			</div>
-		</form>
+					<button
+						type="button"
+						onclick={onCancel}
+						disabled={saving}
+						class="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+					>
+						Cancel
+					</button>
+					<button
+						type="submit"
+						disabled={saving}
+						class="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+					>
+						{saving ? 'Saving...' : exercise ? 'Update' : 'Add'}
+					</button>
+				</div>
+			</form>
+		</div>
 	</div>
 </div>

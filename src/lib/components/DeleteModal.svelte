@@ -17,7 +17,7 @@
 
 <!-- Modal Backdrop -->
 <div
-	class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm"
+	class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm sm:p-4"
 	onclick={handleBackdropClick}
 	onkeydown={(e) => e.key === 'Escape' && onCancel()}
 	role="dialog"
@@ -26,7 +26,7 @@
 	tabindex="-1"
 >
 	<!-- Modal Content -->
-	<div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl" role="document">
+	<div class="w-full max-w-md rounded-lg bg-white p-5 shadow-xl sm:p-6" role="document">
 		<!-- Icon -->
 		<div class="mb-4 flex items-center justify-center">
 			<div class="rounded-full bg-red-100 p-3">

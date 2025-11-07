@@ -66,25 +66,26 @@
 	}
 </script>
 
-<div class="container mx-auto max-w-6xl p-4">
-	<div class="mb-6 flex items-center justify-between">
-		<h1 class="text-3xl font-bold">Exercise Library</h1>
+<div class="container mx-auto max-w-6xl px-4 py-4 sm:py-8">
+	<div class="mb-4 flex items-center justify-between gap-2 sm:mb-6">
+		<h1 class="text-2xl font-bold sm:text-3xl">Exercise Library</h1>
 		<button
 			onclick={handleAdd}
-			class="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+			class="flex-shrink-0 rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700 sm:px-4 sm:text-base"
 		>
-			Add Exercise
+			<span class="hidden sm:inline">Add Exercise</span>
+			<span class="sm:hidden">Add</span>
 		</button>
 	</div>
 
 	<!-- Search -->
-	<div class="mb-6">
+	<div class="mb-4 sm:mb-6">
 		<input
 			type="text"
 			bind:value={searchQuery}
 			oninput={handleSearch}
 			placeholder="Search exercises..."
-			class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+			class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none sm:px-4 sm:text-base"
 		/>
 	</div>
 
@@ -117,12 +118,16 @@
 
 	<!-- Exercise List -->
 	{#if !loading && filteredExercises.length > 0}
-		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+		<div class="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
 			{#each filteredExercises as exercise (exercise.id)}
-				<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md">
-					<div class="mb-2 flex items-start justify-between">
-						<h3 class="text-lg font-semibold">{exercise.name}</h3>
-						<div class="flex gap-2">
+				<div
+					class="rounded-lg border border-gray-200 bg-white p-3 shadow-sm hover:shadow-md sm:p-4"
+				>
+					<div class="mb-2 flex items-start justify-between gap-2">
+						<h3 class="min-w-0 flex-1 truncate text-base font-semibold sm:text-lg">
+							{exercise.name}
+						</h3>
+						<div class="flex flex-shrink-0 gap-2">
 							<button
 								onclick={() => handleEdit(exercise)}
 								class="text-blue-600 hover:text-blue-800"
@@ -153,7 +158,7 @@
 							</button>
 						</div>
 					</div>
-					<p class="mb-2 text-sm text-gray-600">{exercise.description}</p>
+					<p class="mb-2 text-xs break-words text-gray-600 sm:text-sm">{exercise.description}</p>
 					{#if exercise.videoLink}
 						<a
 							href={exercise.videoLink}
