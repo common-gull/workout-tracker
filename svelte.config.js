@@ -15,7 +15,7 @@ const config = {
 		paths: {
 			// Set base path for GitHub Pages deployment
 			// This will be used when deployed to username.github.io/repo-name
-			base: process.env.NODE_ENV === 'production' ? process.env.BASE_PATH || '' : ''
+			base: process.env.NODE_ENV === 'production' ? '/workout-tracker' || '' : ''
 		}
 	}
 };
