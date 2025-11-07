@@ -56,6 +56,15 @@
 					>
 						Calendar
 					</a>
+					<a
+						href="/settings"
+						data-sveltekit-preload-data
+						class="text-gray-600 hover:text-gray-900"
+						class:font-semibold={$page.url.pathname === '/settings'}
+						class:text-blue-600={$page.url.pathname === '/settings'}
+					>
+						Settings
+					</a>
 				</div>
 
 				<!-- Mobile Menu Button -->
@@ -116,6 +125,15 @@
 							class:text-blue-600={$page.url.pathname === '/calendar'}
 						>
 							Calendar
+						</a>
+						<a
+							href="/settings"
+							data-sveltekit-preload-data
+							class="text-gray-600 hover:text-gray-900"
+							class:font-semibold={$page.url.pathname === '/settings'}
+							class:text-blue-600={$page.url.pathname === '/settings'}
+						>
+							Settings
 						</a>
 					</div>
 				</div>

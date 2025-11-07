@@ -4,11 +4,13 @@
 		getWorkoutsByDate,
 		updateWorkout,
 		getWorkoutsSortedByDate,
-		getAllExercises
+		getAllExercises,
+		getSettings
 	} from '$lib/db';
-	import type { Workout, Exercise } from '$lib/types';
+	import type { Workout, Exercise, Settings } from '$lib/types';
 	import WorkoutForm from '$lib/components/WorkoutForm.svelte';
 	import ExerciseDetailModal from '$lib/components/ExerciseDetailModal.svelte';
+	import { convertWeightToDisplay, convertWeightToStorage, getUnitLabel } from '$lib/utils/units';
 
 	let today = $state(new Date().toISOString().split('T')[0]);
 	let workouts = $state<Workout[]>([]);
@@ -20,8 +22,10 @@
 	let expandedExercises = $state<Record<number, number[]>>({});
 	let selectedExerciseDetail = $state<Exercise | null>(null);
 	let allExercises = $state<Exercise[]>([]);
+	let settings = $state<Settings | null>(null);
 
 	onMount(async () => {
+		settings = await getSettings();
 		await loadWorkouts();
 		await loadPreviousWorkouts();
 		allExercises = await getAllExercises();
@@ -100,11 +104,20 @@
 		field: 'weight' | 'reps',
 		value: number
 	) {
-		if (!workout.id) return;
+		if (!workout.id || !settings) return;
 
 		// Clone workout to avoid mutating state
 		const updatedWorkout = JSON.parse(JSON.stringify(workout));
-		updatedWorkout.exercises[exerciseIndex].sets[setIndex][field] = value;
+
+		// Convert weight to storage format (kg) if needed
+		if (field === 'weight') {
+			updatedWorkout.exercises[exerciseIndex].sets[setIndex][field] = convertWeightToStorage(
+				value,
+				settings.unitPreference
+			);
+		} else {
+			updatedWorkout.exercises[exerciseIndex].sets[setIndex][field] = value;
+		}
 
 		try {
 			await updateWorkout(workout.id, {
@@ -419,7 +432,13 @@
 														<span
 															class="inline-flex items-center rounded bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700"
 														>
-															Set {idx + 1}: {set.weight} lbs × {set.reps} reps
+															Set {idx + 1}: {settings
+																? Math.round(
+																		convertWeightToDisplay(set.weight, settings.unitPreference) * 10
+																	) / 10
+																: set.weight}
+															{settings ? getUnitLabel(settings.unitPreference) : 'lbs'} × {set.reps}
+															reps
 														</span>
 													{/each}
 												</div>
@@ -473,7 +492,12 @@
 														<div class="flex flex-1 items-center gap-1.5 sm:flex-none sm:gap-2">
 															<input
 																type="number"
-																value={set.weight}
+																value={settings
+																	? Math.round(
+																			convertWeightToDisplay(set.weight, settings.unitPreference) *
+																				10
+																		) / 10
+																	: set.weight}
 																onchange={(e) =>
 																	updateSetValue(
 																		workout,
@@ -489,7 +513,9 @@
 																min="0"
 																step="5"
 															/>
-															<span class="text-xs text-gray-600 sm:text-sm">lbs</span>
+															<span class="text-xs text-gray-600 sm:text-sm"
+																>{settings ? getUnitLabel(settings.unitPreference) : 'lbs'}</span
+															>
 														</div>
 
 														<!-- Reps Input -->

@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
-	import { addWorkout, updateWorkout, getAllExercises } from '$lib/db';
-	import type { Workout, Exercise, WorkoutExercise } from '$lib/types';
+	import { addWorkout, updateWorkout, getAllExercises, getSettings } from '$lib/db';
+	import type { Workout, Exercise, WorkoutExercise, Settings } from '$lib/types';
+	import { convertWeightToDisplay, convertWeightToStorage, getUnitLabel } from '$lib/utils/units';
 
 	interface Props {
 		workout?: Workout | null;
@@ -14,14 +15,27 @@
 
 	let name = $state(workout?.name || '');
 	let notes = $state(workout?.notes || '');
-	let selectedExercises = $state<WorkoutExercise[]>(workout?.exercises || []);
+	let selectedExercises = $state<WorkoutExercise[]>([]);
 	let availableExercises = $state<Exercise[]>([]);
 	let saving = $state(false);
 	let errors = $state<{ name?: string }>({});
 	let modalBodyRef: HTMLDivElement;
+	let settings = $state<Settings | null>(null);
 
 	onMount(async () => {
+		settings = await getSettings();
 		availableExercises = await getAllExercises();
+
+		// Convert existing workout weights to display format
+		if (workout?.exercises) {
+			selectedExercises = JSON.parse(JSON.stringify(workout.exercises));
+			for (const exercise of selectedExercises) {
+				for (const set of exercise.sets) {
+					set.weight =
+						Math.round(convertWeightToDisplay(set.weight, settings.unitPreference) * 10) / 10;
+				}
+			}
+		}
 	});
 
 	function validate() {
@@ -72,15 +86,24 @@
 	}
 
 	async function handleSubmit() {
-		if (!validate()) return;
+		if (!validate() || !settings) return;
 
 		saving = true;
 		try {
 			// Convert reactive proxies to plain objects for IndexedDB
+			const exercises = JSON.parse(JSON.stringify(selectedExercises));
+
+			// Convert weights to storage format (kg)
+			for (const exercise of exercises) {
+				for (const set of exercise.sets) {
+					set.weight = convertWeightToStorage(set.weight, settings.unitPreference);
+				}
+			}
+
 			const workoutData = {
 				name: name.trim(),
 				date,
-				exercises: JSON.parse(JSON.stringify(selectedExercises)),
+				exercises,
 				notes: notes.trim() || undefined
 			};
 
@@ -228,7 +251,9 @@
 											min="0"
 											class="w-24 rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none"
 										/>
-										<span class="text-sm text-gray-600">lbs ×</span>
+										<span class="text-sm text-gray-600"
+											>{settings ? getUnitLabel(settings.unitPreference) : 'lbs'} ×</span
+										>
 										<input
 											type="number"
 											bind:value={set.reps}

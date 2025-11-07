@@ -55,3 +55,11 @@ export interface CSVWorkoutRow {
 	weight: number;
 	notes?: string;
 }
+
+// Settings represents app-wide user preferences
+export interface Settings {
+	id?: number;
+	unitPreference: 'metric' | 'imperial';
+	createdAt?: Date;
+	updatedAt?: Date;
+}

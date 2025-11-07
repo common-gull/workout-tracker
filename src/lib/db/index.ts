@@ -34,3 +34,5 @@ export {
 	deleteLogsByWorkout,
 	getLogsSortedByDate
 } from './workoutLogs';
+
+export { getSettings, updateSettings, resetSettings } from './settings';

@@ -4,12 +4,13 @@
  */
 
 import Dexie, { type Table } from 'dexie';
-import type { Exercise, Workout, WorkoutLog } from '$lib/types';
+import type { Exercise, Workout, WorkoutLog, Settings } from '$lib/types';
 
 export class WorkoutTrackerDB extends Dexie {
 	exercises!: Table<Exercise>;
 	workouts!: Table<Workout>;
 	workoutLogs!: Table<WorkoutLog>;
+	settings!: Table<Settings>;
 
 	constructor() {
 		super('WorkoutTrackerDB');
@@ -18,6 +19,13 @@ export class WorkoutTrackerDB extends Dexie {
 			exercises: '++id, name, createdAt',
 			workouts: '++id, name, date, createdAt',
 			workoutLogs: '++id, workoutId, exerciseId, completedAt'
+		});
+
+		this.version(2).stores({
+			exercises: '++id, name, createdAt',
+			workouts: '++id, name, date, createdAt',
+			workoutLogs: '++id, workoutId, exerciseId, completedAt',
+			settings: '++id'
 		});
 	}
 }
