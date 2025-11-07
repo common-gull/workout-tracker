@@ -138,16 +138,21 @@
 <div class="container mx-auto max-w-4xl p-4">
 	<!-- Header -->
 	<div class="mb-6 flex items-center justify-between">
-		<h1 class="text-3xl font-bold text-gray-900">
+		<h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
 			{getMonthName()}
 		</h1>
 		<div class="flex gap-2">
 			<button
 				onclick={previousMonth}
-				class="rounded-lg border border-gray-300 bg-white p-2 hover:bg-gray-50"
+				class="rounded-lg border border-gray-300 bg-white p-2 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700"
 				aria-label="Previous month"
 			>
-				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg
+					class="h-5 w-5 dark:text-gray-100"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -158,16 +163,21 @@
 			</button>
 			<button
 				onclick={goToToday}
-				class="rounded-lg border border-gray-300 bg-white px-4 py-2 hover:bg-gray-50"
+				class="rounded-lg border border-gray-300 bg-white px-4 py-2 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
 			>
 				Today
 			</button>
 			<button
 				onclick={nextMonth}
-				class="rounded-lg border border-gray-300 bg-white p-2 hover:bg-gray-50"
+				class="rounded-lg border border-gray-300 bg-white p-2 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700"
 				aria-label="Next month"
 			>
-				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg
+					class="h-5 w-5 dark:text-gray-100"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 				</svg>
 			</button>
@@ -175,43 +185,45 @@
 	</div>
 
 	<!-- Days List -->
-	<div class="divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white shadow-sm">
+	<div
+		class="divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white shadow-sm dark:divide-gray-700 dark:border-gray-700 dark:bg-gray-800"
+	>
 		{#each daysInMonth() as day (day.dateString)}
 			<div
 				data-is-today={day.isToday}
-				class="px-4 py-6"
-				class:bg-blue-50={day.isToday}
-				class:bg-white={!day.isToday}
+				class="{day.isToday
+					? 'bg-blue-50 dark:bg-blue-900/20'
+					: 'bg-white dark:bg-gray-800'} px-4 py-6"
 			>
 				<!-- Day Header -->
 				<div class="mb-4 flex items-center justify-between">
 					<div class="flex items-center gap-4">
 						<div class="text-center">
 							<div
-								class="text-xs font-bold tracking-wide uppercase"
-								class:text-blue-600={day.isToday}
-								class:text-gray-500={!day.isToday}
+								class="text-xs font-bold tracking-wide uppercase {day.isToday
+									? 'text-blue-600 dark:text-blue-400'
+									: 'text-gray-500 dark:text-gray-400'}"
 							>
 								{day.dayName}
 							</div>
 							<div
-								class="text-3xl font-bold"
-								class:text-blue-600={day.isToday}
-								class:text-gray-900={!day.isToday}
+								class="text-3xl font-bold {day.isToday
+									? 'text-blue-600 dark:text-blue-400'
+									: 'text-gray-900 dark:text-gray-100'}"
 							>
 								{day.date.getDate()}
 							</div>
 						</div>
 						<div>
 							<div
-								class="text-xl font-semibold"
-								class:text-blue-900={day.isToday}
-								class:text-gray-900={!day.isToday}
+								class="text-xl font-semibold {day.isToday
+									? 'text-blue-900 dark:text-blue-300'
+									: 'text-gray-900 dark:text-gray-100'}"
 							>
 								{formatDate(day.date)}
 							</div>
 							{#if day.isToday}
-								<div class="text-sm font-medium text-blue-600">Today</div>
+								<div class="text-sm font-medium text-blue-600 dark:text-blue-400">Today</div>
 							{/if}
 						</div>
 					</div>
@@ -234,31 +246,33 @@
 
 				<!-- Workouts List -->
 				{#if getWorkouts(day.dateString).length === 0}
-					<p class="py-4 text-sm text-gray-500">No workouts scheduled</p>
+					<p class="py-4 text-sm text-gray-500 dark:text-gray-400">No workouts scheduled</p>
 				{:else}
 					<div class="space-y-3">
 						{#each getWorkouts(day.dateString) as workout (workout.id)}
 							<div
-								class="group/workout rounded-lg border border-blue-200 bg-blue-50 p-4 transition-all hover:border-blue-300 hover:bg-blue-100"
+								class="group/workout rounded-lg border border-blue-200 bg-blue-50 p-4 transition-all hover:border-blue-300 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/20 dark:hover:border-blue-700 dark:hover:bg-blue-900/30"
 							>
 								<div class="flex items-start justify-between gap-3">
 									<button
 										onclick={() => handleEditWorkout(workout)}
 										class="min-w-0 flex-1 text-left"
 									>
-										<h3 class="text-lg font-semibold text-blue-900">{workout.name}</h3>
+										<h3 class="text-lg font-semibold text-blue-900 dark:text-blue-200">
+											{workout.name}
+										</h3>
 										{#if workout.exercises.length > 0}
 											<div class="mt-2 space-y-2">
 												{#each workout.exercises as exercise (exercise.exerciseId)}
 													<div>
-														<div class="text-sm text-blue-700">
+														<div class="text-sm text-blue-700 dark:text-blue-300">
 															<span class="font-medium">{exercise.exerciseName}</span>
-															<span class="text-blue-600">
+															<span class="text-blue-600 dark:text-blue-400">
 																- {exercise.sets.length} set{exercise.sets.length !== 1 ? 's' : ''}
 															</span>
 														</div>
 														{#if exercise.notes}
-															<div class="mt-1 text-xs text-blue-600 italic">
+															<div class="mt-1 text-xs text-blue-600 italic dark:text-blue-400">
 																"{exercise.notes}"
 															</div>
 														{/if}
@@ -267,13 +281,13 @@
 											</div>
 										{/if}
 										{#if workout.notes}
-											<p class="mt-2 text-sm text-blue-600">{workout.notes}</p>
+											<p class="mt-2 text-sm text-blue-600 dark:text-blue-400">{workout.notes}</p>
 										{/if}
 									</button>
 									<div class="flex gap-2">
 										<button
 											onclick={() => handleEditWorkout(workout)}
-											class="rounded-lg p-2 text-blue-600 hover:bg-blue-200"
+											class="rounded-lg p-2 text-blue-600 hover:bg-blue-200 dark:text-blue-400 dark:hover:bg-blue-800/50"
 											aria-label="Edit workout"
 										>
 											<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -287,7 +301,7 @@
 										</button>
 										<button
 											onclick={() => handleDeleteWorkout(workout)}
-											class="rounded-lg p-2 text-red-600 hover:bg-red-100"
+											class="rounded-lg p-2 text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/30"
 											aria-label="Delete workout"
 										>
 											<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

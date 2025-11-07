@@ -26,11 +26,19 @@
 	tabindex="-1"
 >
 	<!-- Modal Content -->
-	<div class="w-full max-w-md rounded-lg bg-white p-5 shadow-xl sm:p-6" role="document">
+	<div
+		class="w-full max-w-md rounded-lg bg-white p-5 shadow-xl sm:p-6 dark:bg-gray-800"
+		role="document"
+	>
 		<!-- Icon -->
 		<div class="mb-4 flex items-center justify-center">
-			<div class="rounded-full bg-red-100 p-3">
-				<svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<div class="rounded-full bg-red-100 p-3 dark:bg-red-900/30">
+				<svg
+					class="h-6 w-6 text-red-600 dark:text-red-400"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -41,14 +49,14 @@
 			</div>
 		</div>
 
-		<h2 id="modal-title" class="mb-2 text-center text-xl font-bold">{title}</h2>
-		<p class="mb-6 text-center text-gray-600">{message}</p>
+		<h2 id="modal-title" class="mb-2 text-center text-xl font-bold dark:text-gray-100">{title}</h2>
+		<p class="mb-6 text-center text-gray-600 dark:text-gray-300">{message}</p>
 
 		<!-- Actions -->
 		<div class="flex gap-3">
 			<button
 				onclick={onCancel}
-				class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
+				class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
 			>
 				Cancel
 			</button>

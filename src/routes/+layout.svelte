@@ -2,6 +2,9 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
+	import { getSettings } from '$lib/db';
+	import { initializeTheme } from '$lib/utils/theme';
 
 	let { children } = $props();
 	let mobileMenuOpen = $state(false);
@@ -12,6 +15,12 @@
 		$page.url.pathname;
 		mobileMenuOpen = false;
 	});
+
+	// Initialize theme on mount
+	onMount(async () => {
+		const settings = await getSettings();
+		initializeTheme(settings.theme);
+	});
 </script>
 
 <svelte:head>
@@ -20,10 +29,14 @@
 
 <div class="flex min-h-screen flex-col">
 	<!-- Navigation -->
-	<nav class="border-b border-gray-200 bg-white shadow-sm">
+	<nav class="border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
 		<div class="container mx-auto max-w-7xl px-4">
 			<div class="flex h-16 items-center justify-between">
-				<a href="/" data-sveltekit-preload-data class="text-lg font-bold text-gray-900 sm:text-xl">
+				<a
+					href="/"
+					data-sveltekit-preload-data
+					class="text-lg font-bold text-gray-900 sm:text-xl dark:text-gray-100"
+				>
 					Workout Tracker
 				</a>
 
@@ -32,36 +45,40 @@
 					<a
 						href="/"
 						data-sveltekit-preload-data
-						class="text-gray-600 hover:text-gray-900"
+						class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
 						class:font-semibold={$page.url.pathname === '/'}
 						class:text-blue-600={$page.url.pathname === '/'}
+						class:dark:text-blue-400={$page.url.pathname === '/'}
 					>
 						Today
 					</a>
 					<a
 						href="/exercises"
 						data-sveltekit-preload-data
-						class="text-gray-600 hover:text-gray-900"
+						class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
 						class:font-semibold={$page.url.pathname === '/exercises'}
 						class:text-blue-600={$page.url.pathname === '/exercises'}
+						class:dark:text-blue-400={$page.url.pathname === '/exercises'}
 					>
 						Exercises
 					</a>
 					<a
 						href="/calendar"
 						data-sveltekit-preload-data
-						class="text-gray-600 hover:text-gray-900"
+						class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
 						class:font-semibold={$page.url.pathname === '/calendar'}
 						class:text-blue-600={$page.url.pathname === '/calendar'}
+						class:dark:text-blue-400={$page.url.pathname === '/calendar'}
 					>
 						Calendar
 					</a>
 					<a
 						href="/settings"
 						data-sveltekit-preload-data
-						class="text-gray-600 hover:text-gray-900"
+						class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
 						class:font-semibold={$page.url.pathname === '/settings'}
 						class:text-blue-600={$page.url.pathname === '/settings'}
+						class:dark:text-blue-400={$page.url.pathname === '/settings'}
 					>
 						Settings
 					</a>
@@ -70,7 +87,7 @@
 				<!-- Mobile Menu Button -->
 				<button
 					onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
-					class="rounded-lg p-2 text-gray-600 hover:bg-gray-100 md:hidden"
+					class="rounded-lg p-2 text-gray-600 hover:bg-gray-100 md:hidden dark:text-gray-300 dark:hover:bg-gray-700"
 					aria-label="Toggle menu"
 				>
 					{#if mobileMenuOpen}
@@ -97,41 +114,45 @@
 
 			<!-- Mobile Menu -->
 			{#if mobileMenuOpen}
-				<div class="border-t border-gray-200 py-4 md:hidden">
+				<div class="border-t border-gray-200 py-4 md:hidden dark:border-gray-700">
 					<div class="flex flex-col space-y-4">
 						<a
 							href="/"
 							data-sveltekit-preload-data
-							class="text-gray-600 hover:text-gray-900"
+							class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
 							class:font-semibold={$page.url.pathname === '/'}
 							class:text-blue-600={$page.url.pathname === '/'}
+							class:dark:text-blue-400={$page.url.pathname === '/'}
 						>
 							Today
 						</a>
 						<a
 							href="/exercises"
 							data-sveltekit-preload-data
-							class="text-gray-600 hover:text-gray-900"
+							class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
 							class:font-semibold={$page.url.pathname === '/exercises'}
 							class:text-blue-600={$page.url.pathname === '/exercises'}
+							class:dark:text-blue-400={$page.url.pathname === '/exercises'}
 						>
 							Exercises
 						</a>
 						<a
 							href="/calendar"
 							data-sveltekit-preload-data
-							class="text-gray-600 hover:text-gray-900"
+							class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
 							class:font-semibold={$page.url.pathname === '/calendar'}
 							class:text-blue-600={$page.url.pathname === '/calendar'}
+							class:dark:text-blue-400={$page.url.pathname === '/calendar'}
 						>
 							Calendar
 						</a>
 						<a
 							href="/settings"
 							data-sveltekit-preload-data
-							class="text-gray-600 hover:text-gray-900"
+							class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
 							class:font-semibold={$page.url.pathname === '/settings'}
 							class:text-blue-600={$page.url.pathname === '/settings'}
+							class:dark:text-blue-400={$page.url.pathname === '/settings'}
 						>
 							Settings
 						</a>
@@ -142,7 +163,7 @@
 	</nav>
 
 	<!-- Main Content -->
-	<main class="flex-1 bg-gray-50">
+	<main class="flex-1 bg-gray-50 dark:bg-gray-900">
 		{@render children()}
 	</main>
 </div>

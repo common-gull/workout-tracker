@@ -139,12 +139,14 @@
 >
 	<!-- Modal Content -->
 	<div
-		class="flex h-full w-full max-w-2xl flex-col bg-white shadow-xl sm:h-auto sm:max-h-[90vh] sm:rounded-lg"
+		class="flex h-full w-full max-w-2xl flex-col bg-white shadow-xl sm:h-auto sm:max-h-[90vh] sm:rounded-lg dark:bg-gray-800"
 		role="document"
 	>
 		<!-- Modal Header (Fixed) -->
-		<div class="flex-shrink-0 border-b border-gray-200 px-4 py-3 sm:px-6 sm:py-4">
-			<h2 id="form-title" class="text-xl font-bold sm:text-2xl">
+		<div
+			class="flex-shrink-0 border-b border-gray-200 px-4 py-3 sm:px-6 sm:py-4 dark:border-gray-700"
+		>
+			<h2 id="form-title" class="text-xl font-bold sm:text-2xl dark:text-gray-100">
 				{workout ? 'Edit Workout' : 'Add Workout'} - {date}
 			</h2>
 		</div>
@@ -159,7 +161,7 @@
 			>
 				<!-- Workout Name -->
 				<div class="mb-4">
-					<label for="name" class="mb-1 block text-sm font-medium text-gray-700">
+					<label for="name" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
 						Workout Name *
 					</label>
 					<input
@@ -167,7 +169,7 @@
 						type="text"
 						bind:value={name}
 						placeholder="e.g. Upper Body Day"
-						class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+						class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
 						class:border-red-500={errors.name}
 					/>
 					{#if errors.name}
@@ -178,7 +180,8 @@
 				<!-- Exercises -->
 				<div class="mb-4">
 					<div class="mb-2 flex items-center justify-between">
-						<span class="block text-sm font-medium text-gray-700">Exercises</span>
+						<span class="block text-sm font-medium text-gray-700 dark:text-gray-300">Exercises</span
+						>
 						<button
 							type="button"
 							onclick={addExercise}
@@ -190,11 +193,15 @@
 					</div>
 
 					{#if availableExercises.length === 0}
-						<p class="text-sm text-gray-500">No exercises available. Create exercises first.</p>
+						<p class="text-sm text-gray-500 dark:text-gray-400">
+							No exercises available. Create exercises first.
+						</p>
 					{/if}
 
 					{#each selectedExercises as exercise, exerciseIndex (exerciseIndex)}
-						<div class="mb-4 rounded-lg border border-gray-200 p-4">
+						<div
+							class="dark:bg-gray-750 mb-4 rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+						>
 							<div class="mb-2 flex items-center justify-between">
 								<select
 									bind:value={exercise.exerciseId}
@@ -205,7 +212,7 @@
 											selectedExercises = [...selectedExercises];
 										}
 									}}
-									class="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+									class="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
 								>
 									{#each availableExercises as ex (ex.id)}
 										<option value={ex.id}>{ex.name}</option>
@@ -214,7 +221,7 @@
 								<button
 									type="button"
 									onclick={() => removeExercise(exerciseIndex)}
-									class="ml-2 text-red-600 hover:text-red-800"
+									class="ml-2 text-red-600 hover:text-red-800 dark:text-red-400"
 									aria-label="Remove exercise"
 								>
 									<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -231,11 +238,11 @@
 							<!-- Sets -->
 							<div class="space-y-2">
 								<div class="flex items-center justify-between">
-									<span class="text-sm font-medium text-gray-700">Sets</span>
+									<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Sets</span>
 									<button
 										type="button"
 										onclick={() => addSet(exerciseIndex)}
-										class="text-sm text-blue-600 hover:text-blue-800"
+										class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400"
 									>
 										+ Add Set
 									</button>
@@ -243,15 +250,16 @@
 
 								{#each exercise.sets as set, setIndex (setIndex)}
 									<div class="flex items-center gap-2">
-										<span class="w-8 text-sm text-gray-600">{setIndex + 1}.</span>
+										<span class="w-8 text-sm text-gray-600 dark:text-gray-400">{setIndex + 1}.</span
+										>
 										<input
 											type="number"
 											bind:value={set.weight}
 											placeholder="Weight"
 											min="0"
-											class="w-24 rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none"
+											class="w-24 rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
 										/>
-										<span class="text-sm text-gray-600"
+										<span class="text-sm text-gray-600 dark:text-gray-400"
 											>{settings ? getUnitLabel(settings.unitPreference) : 'lbs'} ×</span
 										>
 										<input
@@ -259,13 +267,13 @@
 											bind:value={set.reps}
 											placeholder="Reps"
 											min="0"
-											class="w-20 rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none"
+											class="w-20 rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
 										/>
-										<span class="text-sm text-gray-600">reps</span>
+										<span class="text-sm text-gray-600 dark:text-gray-400">reps</span>
 										<button
 											type="button"
 											onclick={() => removeSet(exerciseIndex, setIndex)}
-											class="text-red-600 hover:text-red-800"
+											class="text-red-600 hover:text-red-800 dark:text-red-400"
 											aria-label="Remove set"
 										>
 											<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -285,7 +293,7 @@
 							<div class="mt-3">
 								<label
 									for="exercise-notes-{exerciseIndex}"
-									class="mb-1 block text-xs font-medium text-gray-700"
+									class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300"
 								>
 									Notes for this exercise
 								</label>
@@ -294,7 +302,7 @@
 									bind:value={exercise.notes}
 									placeholder="Add notes about form, difficulty, adjustments, etc..."
 									rows="2"
-									class="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none"
+									class="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
 								></textarea>
 							</div>
 						</div>
@@ -303,7 +311,10 @@
 
 				<!-- Notes -->
 				<div class="mb-6">
-					<label for="notes" class="mb-1 block text-sm font-medium text-gray-700">
+					<label
+						for="notes"
+						class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+					>
 						Notes (optional)
 					</label>
 					<textarea
@@ -311,20 +322,22 @@
 						bind:value={notes}
 						placeholder="Any additional notes..."
 						rows="2"
-						class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+						class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
 					></textarea>
 				</div>
 			</form>
 		</div>
 
 		<!-- Modal Footer (Fixed) -->
-		<div class="flex-shrink-0 border-t border-gray-200 px-4 py-3 sm:px-6 sm:py-4">
+		<div
+			class="flex-shrink-0 border-t border-gray-200 px-4 py-3 sm:px-6 sm:py-4 dark:border-gray-700"
+		>
 			<div class="flex justify-end gap-3">
 				<button
 					type="button"
 					onclick={onCancel}
 					disabled={saving}
-					class="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+					class="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
 				>
 					Cancel
 				</button>

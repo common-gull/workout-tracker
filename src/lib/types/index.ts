@@ -60,6 +60,7 @@ export interface CSVWorkoutRow {
 export interface Settings {
 	id?: number;
 	unitPreference: 'metric' | 'imperial';
+	theme: 'light' | 'dark' | 'system';
 	createdAt?: Date;
 	updatedAt?: Date;
 }

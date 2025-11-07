@@ -209,19 +209,21 @@
 <div class="container mx-auto max-w-4xl p-4">
 	<!-- Header -->
 	<div class="mb-6">
-		<h1 class="text-3xl font-bold text-gray-900">Today's Workouts</h1>
-		<p class="mt-1 text-lg text-gray-600">{getTodayFormatted()}</p>
+		<h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Today's Workouts</h1>
+		<p class="mt-1 text-lg text-gray-600 dark:text-gray-400">{getTodayFormatted()}</p>
 	</div>
 
 	{#if loading}
 		<div class="flex items-center justify-center py-12">
-			<div class="text-gray-500">Loading...</div>
+			<div class="text-gray-500 dark:text-gray-400">Loading...</div>
 		</div>
 	{:else if workouts.length === 0}
 		<!-- Empty State -->
-		<div class="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center">
+		<div
+			class="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-800"
+		>
 			<svg
-				class="mx-auto mb-4 h-16 w-16 text-gray-400"
+				class="mx-auto mb-4 h-16 w-16 text-gray-400 dark:text-gray-500"
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"
@@ -233,8 +235,10 @@
 					d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
 				/>
 			</svg>
-			<h2 class="mb-2 text-xl font-semibold text-gray-900">No workouts scheduled for today</h2>
-			<p class="mb-6 text-gray-600">Get started by adding a workout for today</p>
+			<h2 class="mb-2 text-xl font-semibold text-gray-900 dark:text-gray-100">
+				No workouts scheduled for today
+			</h2>
+			<p class="mb-6 text-gray-600 dark:text-gray-400">Get started by adding a workout for today</p>
 			<button
 				onclick={handleAddWorkout}
 				class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700"
@@ -258,21 +262,21 @@
 				{@const isComplete = isWorkoutComplete(workout)}
 
 				<div
-					class="overflow-hidden rounded-lg border bg-white shadow-sm transition-shadow hover:shadow-md"
+					class="overflow-hidden rounded-lg border bg-white shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
 					class:border-green-500={isComplete}
 					class:border-gray-200={!isComplete}
 				>
 					<!-- Workout Header -->
 					<div
-						class="border-b px-4 py-3 sm:px-6 sm:py-4"
-						class:bg-green-50={isComplete}
-						class:border-green-200={isComplete}
-						class:bg-gray-50={!isComplete}
-						class:border-gray-200={!isComplete}
+						class="border-b px-4 py-3 sm:px-6 sm:py-4 {isComplete
+							? 'border-green-200 bg-green-50 dark:bg-green-900/20'
+							: 'border-gray-200 bg-gray-50 dark:border-gray-600 dark:bg-gray-700'}"
 					>
 						<div class="flex items-center justify-between gap-2">
 							<div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
-								<h2 class="truncate text-xl font-bold text-gray-900 sm:text-2xl">{workout.name}</h2>
+								<h2 class="truncate text-xl font-bold text-gray-900 sm:text-2xl dark:text-gray-100">
+									{workout.name}
+								</h2>
 								{#if isComplete}
 									<span
 										class="flex flex-shrink-0 items-center gap-1 rounded-full bg-green-600 px-2 py-0.5 text-xs font-medium text-white sm:px-3 sm:py-1 sm:text-sm"
@@ -296,7 +300,7 @@
 							</div>
 							<button
 								onclick={() => handleEditWorkout(workout)}
-								class="flex-shrink-0 rounded-lg p-2 text-gray-600 hover:bg-gray-200"
+								class="flex-shrink-0 rounded-lg p-2 text-gray-600 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600"
 								aria-label="Edit workout"
 							>
 								<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -309,12 +313,12 @@
 								</svg>
 							</button>
 						</div>
-						<div class="mt-2 flex items-center gap-4 text-sm text-gray-600">
+						<div class="mt-2 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
 							<span>
 								{stats.completed} / {stats.total} sets completed
 							</span>
 							<div class="flex-1">
-								<div class="h-2 overflow-hidden rounded-full bg-gray-200">
+								<div class="h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-600">
 									<div
 										class="h-full transition-all"
 										class:bg-green-500={isComplete}
@@ -328,16 +332,18 @@
 
 					<!-- Workout Notes -->
 					{#if workout.notes}
-						<div class="border-b border-gray-200 bg-blue-50 px-4 py-3 sm:px-6">
-							<p class="text-sm text-gray-700">
-								<span class="font-semibold text-gray-900">Workout Notes:</span>
+						<div
+							class="border-b border-gray-200 bg-blue-50 px-4 py-3 sm:px-6 dark:border-gray-600 dark:bg-blue-900/20"
+						>
+							<p class="text-sm text-gray-700 dark:text-gray-300">
+								<span class="font-semibold text-gray-900 dark:text-gray-100">Workout Notes:</span>
 								<span class="break-words">{workout.notes}</span>
 							</p>
 						</div>
 					{/if}
 
 					<!-- Exercises -->
-					<div class="divide-y divide-gray-200">
+					<div class="divide-y divide-gray-200 dark:divide-gray-700">
 						{#each workout.exercises as exercise, exerciseIndex (exercise.exerciseId)}
 							{@const lastPerformance = getLastExercisePerformance(exercise.exerciseId)}
 							{@const isExpanded = isExerciseExpanded(workout.id!, exerciseIndex)}
@@ -355,7 +361,7 @@
 									>
 										<div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
 											<svg
-												class="h-4 w-4 flex-shrink-0 text-gray-500 transition-transform sm:h-5 sm:w-5"
+												class="h-4 w-4 flex-shrink-0 text-gray-500 transition-transform sm:h-5 sm:w-5 dark:text-gray-400"
 												class:rotate-90={isExpanded}
 												fill="none"
 												stroke="currentColor"
@@ -368,7 +374,9 @@
 													d="M9 5l7 7-7 7"
 												/>
 											</svg>
-											<h3 class="truncate text-base font-semibold text-gray-900 sm:text-lg">
+											<h3
+												class="truncate text-base font-semibold text-gray-900 sm:text-lg dark:text-gray-100"
+											>
 												{exercise.exerciseName}
 											</h3>
 											{#if isExerciseComplete}
@@ -392,13 +400,13 @@
 												</span>
 											{/if}
 										</div>
-										<span class="flex-shrink-0 text-xs text-gray-600 sm:text-sm">
+										<span class="flex-shrink-0 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
 											{exerciseStats.completed}/{exerciseStats.total}
 										</span>
 									</button>
 									<button
 										onclick={() => viewExerciseDetail(exercise.exerciseId)}
-										class="flex-shrink-0 rounded-lg p-1.5 text-blue-600 hover:bg-blue-50"
+										class="flex-shrink-0 rounded-lg p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
 										aria-label="View exercise details"
 										title="View details & video"
 									>
@@ -417,8 +425,10 @@
 								{#if isExpanded}
 									<div class="mt-3">
 										{#if lastPerformance}
-											<div class="mb-3 rounded-md bg-gray-100 p-3">
-												<p class="mb-2 text-xs font-medium tracking-wide text-gray-600 uppercase">
+											<div class="mb-3 rounded-md bg-gray-100 p-3 dark:bg-gray-700">
+												<p
+													class="mb-2 text-xs font-medium tracking-wide text-gray-600 uppercase dark:text-gray-400"
+												>
 													Last workout ({new Date(lastPerformance.date).toLocaleDateString(
 														'en-US',
 														{
@@ -430,7 +440,7 @@
 												<div class="flex flex-wrap gap-2">
 													{#each lastPerformance.sets as set, idx (idx)}
 														<span
-															class="inline-flex items-center rounded bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700"
+															class="inline-flex items-center rounded bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-600 dark:text-gray-200"
 														>
 															Set {idx + 1}: {settings
 																? Math.round(
@@ -448,11 +458,9 @@
 										<div class="space-y-2">
 											{#each exercise.sets as set, setIndex (setIndex)}
 												<div
-													class="flex flex-col gap-2 rounded-lg border p-2 transition-colors sm:flex-row sm:items-center sm:justify-between sm:p-3"
-													class:border-green-500={set.completed}
-													class:bg-green-50={set.completed}
-													class:border-gray-300={!set.completed}
-													class:bg-white={!set.completed}
+													class="flex flex-col gap-2 rounded-lg border p-2 transition-colors sm:flex-row sm:items-center sm:justify-between sm:p-3 {set.completed
+														? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+														: 'border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-700'}"
 												>
 													<!-- Top/Left: Checkbox and Label -->
 													<div class="flex items-center gap-2 sm:gap-3">
@@ -481,7 +489,9 @@
 																</svg>
 															{/if}
 														</button>
-														<span class="text-sm font-medium text-gray-900 sm:text-base">
+														<span
+															class="text-sm font-medium text-gray-900 sm:text-base dark:text-gray-100"
+														>
 															Set {setIndex + 1}
 														</span>
 													</div>
@@ -507,13 +517,13 @@
 																		Number(e.currentTarget.value)
 																	)}
 																onclick={(e) => e.stopPropagation()}
-																class="w-full rounded border border-gray-300 px-2 py-1.5 text-center text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none sm:w-20"
-																class:border-green-500={set.completed}
-																class:bg-white={set.completed}
+																class="w-full rounded border px-2 py-1.5 text-center text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none sm:w-20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 {set.completed
+																	? 'border-green-500 bg-white dark:bg-gray-700'
+																	: 'border-gray-300'}"
 																min="0"
 																step="5"
 															/>
-															<span class="text-xs text-gray-600 sm:text-sm"
+															<span class="text-xs text-gray-600 sm:text-sm dark:text-gray-300"
 																>{settings ? getUnitLabel(settings.unitPreference) : 'lbs'}</span
 															>
 														</div>
@@ -532,13 +542,13 @@
 																		Number(e.currentTarget.value)
 																	)}
 																onclick={(e) => e.stopPropagation()}
-																class="w-full rounded border border-gray-300 px-2 py-1.5 text-center text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none sm:w-16"
-																class:border-green-500={set.completed}
-																class:bg-white={set.completed}
+																class="w-full rounded border px-2 py-1.5 text-center text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none sm:w-16 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 {set.completed
+																	? 'border-green-500 bg-white dark:bg-gray-700'
+																	: 'border-gray-300'}"
 																min="0"
 																step="1"
 															/>
-															<span class="text-sm text-gray-600">reps</span>
+															<span class="text-sm text-gray-600 dark:text-gray-300">reps</span>
 														</div>
 													</div>
 												</div>
@@ -549,7 +559,7 @@
 										<div class="mt-3">
 											<label
 												for="exercise-notes-{workout.id}-{exerciseIndex}"
-												class="mb-1 block text-sm font-medium text-gray-700"
+												class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
 											>
 												Notes for this exercise
 											</label>
@@ -560,7 +570,7 @@
 													updateExerciseNotes(workout, exerciseIndex, e.currentTarget.value)}
 												placeholder="Add notes about form, difficulty, adjustments, etc..."
 												rows="2"
-												class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+												class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400"
 											></textarea>
 										</div>
 									</div>
@@ -574,7 +584,7 @@
 			<!-- Add Another Workout Button -->
 			<button
 				onclick={handleAddWorkout}
-				class="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 bg-white py-4 text-gray-600 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600"
+				class="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 bg-white py-4 text-gray-600 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-blue-500 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
 			>
 				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path

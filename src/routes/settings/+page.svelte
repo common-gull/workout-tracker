@@ -14,6 +14,7 @@
 		restoreFromEncryptedBackup,
 		deleteAllData
 	} from '$lib/utils/backup';
+	import { initializeTheme } from '$lib/utils/theme';
 
 	let settings = $state<Settings | null>(null);
 	let loading = $state(true);
@@ -42,6 +43,14 @@
 		await updateSettings({ unitPreference: unit });
 		settings = await getSettings();
 		showStatus('success', 'Unit preference updated');
+	}
+
+	async function handleThemeChange(theme: 'light' | 'dark' | 'system') {
+		if (!settings) return;
+		await updateSettings({ theme });
+		settings = await getSettings();
+		initializeTheme(theme);
+		showStatus('success', 'Theme updated');
 	}
 
 	async function handleExportExercises() {
@@ -239,11 +248,11 @@
 </script>
 
 <div class="container mx-auto max-w-4xl px-4 py-8">
-	<h1 class="mb-8 text-3xl font-bold text-gray-900">Settings</h1>
+	<h1 class="mb-8 text-3xl font-bold text-gray-900 dark:text-gray-100">Settings</h1>
 
 	{#if loading}
 		<div class="flex items-center justify-center py-12">
-			<div class="text-gray-500">Loading settings...</div>
+			<div class="text-gray-500 dark:text-gray-400">Loading settings...</div>
 		</div>
 	{:else if settings}
 		<!-- Status Message -->
@@ -262,34 +271,85 @@
 			</div>
 		{/if}
 
-		<!-- Unit Preferences -->
-		<section class="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-			<h2 class="mb-4 text-xl font-semibold text-gray-900">Unit Preferences</h2>
+		<!-- Appearance -->
+		<section
+			class="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+		>
+			<h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100">Appearance</h2>
 			<div class="space-y-4">
 				<div>
-					<span class="mb-2 block text-sm font-medium text-gray-700">Weight Unit</span>
+					<span class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Theme</span>
+					<div class="flex flex-wrap gap-4">
+						<label class="flex cursor-pointer items-center">
+							<input
+								type="radio"
+								name="theme"
+								value="light"
+								bind:group={settings.theme}
+								onchange={() => handleThemeChange('light')}
+								class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+							/>
+							<span class="ml-2 text-sm text-gray-900 dark:text-gray-100">Light</span>
+						</label>
+						<label class="flex cursor-pointer items-center">
+							<input
+								type="radio"
+								name="theme"
+								value="dark"
+								bind:group={settings.theme}
+								onchange={() => handleThemeChange('dark')}
+								class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+							/>
+							<span class="ml-2 text-sm text-gray-900 dark:text-gray-100">Dark</span>
+						</label>
+						<label class="flex cursor-pointer items-center">
+							<input
+								type="radio"
+								name="theme"
+								value="system"
+								bind:group={settings.theme}
+								onchange={() => handleThemeChange('system')}
+								class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+							/>
+							<span class="ml-2 text-sm text-gray-900 dark:text-gray-100">System</span>
+						</label>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Unit Preferences -->
+		<section
+			class="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+		>
+			<h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100">Unit Preferences</h2>
+			<div class="space-y-4">
+				<div>
+					<span class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+						>Weight Unit</span
+					>
 					<div class="flex gap-4">
 						<label class="flex cursor-pointer items-center">
 							<input
 								type="radio"
 								name="unit"
 								value="imperial"
-								checked={settings.unitPreference === 'imperial'}
+								bind:group={settings.unitPreference}
 								onchange={() => handleUnitPreferenceChange('imperial')}
 								class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
 							/>
-							<span class="ml-2 text-sm text-gray-900">Imperial (lbs)</span>
+							<span class="ml-2 text-sm text-gray-900 dark:text-gray-100">Imperial (lbs)</span>
 						</label>
 						<label class="flex cursor-pointer items-center">
 							<input
 								type="radio"
 								name="unit"
 								value="metric"
-								checked={settings.unitPreference === 'metric'}
+								bind:group={settings.unitPreference}
 								onchange={() => handleUnitPreferenceChange('metric')}
 								class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
 							/>
-							<span class="ml-2 text-sm text-gray-900">Metric (kg)</span>
+							<span class="ml-2 text-sm text-gray-900 dark:text-gray-100">Metric (kg)</span>
 						</label>
 					</div>
 				</div>
@@ -297,22 +357,24 @@
 		</section>
 
 		<!-- CSV Import/Export -->
-		<section class="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-			<h2 class="mb-4 text-xl font-semibold text-gray-900">CSV Import/Export</h2>
+		<section
+			class="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+		>
+			<h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100">CSV Import/Export</h2>
 			<div class="space-y-4">
 				<div class="grid gap-4 sm:grid-cols-2">
 					<!-- Export Exercises -->
 					<div>
-						<h3 class="mb-2 text-sm font-medium text-gray-700">Exercises</h3>
+						<h3 class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Exercises</h3>
 						<div class="flex flex-col gap-2">
 							<button
 								onclick={handleExportExercises}
-								class="rounded-lg border border-blue-600 bg-white px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+								class="rounded-lg border border-blue-600 bg-white px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 dark:bg-gray-700 dark:hover:bg-gray-600"
 							>
 								Export Exercises
 							</button>
 							<label
-								class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-center text-sm font-medium text-gray-700 hover:bg-gray-50"
+								class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-center text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
 							>
 								Import Exercises
 								<input type="file" accept=".csv" onchange={handleImportExercises} class="hidden" />
@@ -322,16 +384,16 @@
 
 					<!-- Export Workouts -->
 					<div>
-						<h3 class="mb-2 text-sm font-medium text-gray-700">Workouts</h3>
+						<h3 class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Workouts</h3>
 						<div class="flex flex-col gap-2">
 							<button
 								onclick={handleExportWorkouts}
-								class="rounded-lg border border-blue-600 bg-white px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+								class="rounded-lg border border-blue-600 bg-white px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 dark:bg-gray-700 dark:hover:bg-gray-600"
 							>
 								Export Workouts
 							</button>
 							<label
-								class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-center text-sm font-medium text-gray-700 hover:bg-gray-50"
+								class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-center text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
 							>
 								Import Workouts
 								<input type="file" accept=".csv" onchange={handleImportWorkouts} class="hidden" />
@@ -339,7 +401,7 @@
 						</div>
 					</div>
 				</div>
-				<p class="text-xs text-gray-500">
+				<p class="text-xs text-gray-500 dark:text-gray-400">
 					CSV format: Exercises (name, description, videoLink) | Workouts (date, workoutName,
 					exerciseName, setNumber, weight, reps, notes)
 				</p>
@@ -347,8 +409,10 @@
 		</section>
 
 		<!-- Encrypted Backup -->
-		<section class="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-			<h2 class="mb-4 text-xl font-semibold text-gray-900">Encrypted Backup</h2>
+		<section
+			class="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+		>
+			<h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100">Encrypted Backup</h2>
 			<div class="space-y-4">
 				<div class="flex flex-col gap-3 sm:flex-row">
 					<button
@@ -358,13 +422,13 @@
 						Create Encrypted Backup
 					</button>
 					<label
-						class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-center text-sm font-medium text-gray-700 hover:bg-gray-50"
+						class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-center text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
 					>
 						Restore from Backup
 						<input type="file" accept=".backup" onchange={handleRestoreBackup} class="hidden" />
 					</label>
 				</div>
-				<p class="text-xs text-gray-500">
+				<p class="text-xs text-gray-500 dark:text-gray-400">
 					Create a password-protected backup of all your data. Keep your password safe - it cannot
 					be recovered!
 				</p>
@@ -372,10 +436,12 @@
 		</section>
 
 		<!-- Delete All Data -->
-		<section class="rounded-lg border border-red-300 bg-red-50 p-6 shadow-sm">
-			<h2 class="mb-4 text-xl font-semibold text-red-900">Danger Zone</h2>
+		<section
+			class="rounded-lg border border-red-300 bg-red-50 p-6 shadow-sm dark:border-red-800 dark:bg-red-900/20"
+		>
+			<h2 class="mb-4 text-xl font-semibold text-red-900 dark:text-red-300">Danger Zone</h2>
 			<div class="space-y-4">
-				<p class="text-sm text-red-800">
+				<p class="text-sm text-red-800 dark:text-red-300">
 					Permanently delete all exercises, workouts, and workout logs. This action cannot be
 					undone.
 				</p>
@@ -400,16 +466,18 @@
 		aria-modal="true"
 		tabindex="-1"
 	>
-		<div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-			<h3 class="mb-4 text-xl font-semibold text-gray-900">Create Encrypted Backup</h3>
-			<p class="mb-4 text-sm text-gray-600">
+		<div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+			<h3 class="mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100">
+				Create Encrypted Backup
+			</h3>
+			<p class="mb-4 text-sm text-gray-600 dark:text-gray-300">
 				Enter a password to encrypt your backup. You'll need this password to restore your data.
 			</p>
 			<input
 				type="password"
 				bind:value={backupPassword}
 				placeholder="Enter password (min 6 characters)"
-				class="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+				class="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
 				onkeydown={(e) => e.key === 'Enter' && confirmCreateBackup()}
 			/>
 			<div class="flex gap-3">
@@ -423,7 +491,7 @@
 				<button
 					onclick={() => (showBackupPasswordModal = false)}
 					disabled={processingBackup}
-					class="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:bg-gray-100"
+					class="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
 				>
 					Cancel
 				</button>
@@ -442,16 +510,18 @@
 		aria-modal="true"
 		tabindex="-1"
 	>
-		<div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-			<h3 class="mb-4 text-xl font-semibold text-gray-900">Restore from Backup</h3>
-			<p class="mb-4 text-sm font-medium text-red-600">
+		<div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+			<h3 class="mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100">
+				Restore from Backup
+			</h3>
+			<p class="mb-4 text-sm font-medium text-red-600 dark:text-red-400">
 				Warning: This will replace all your current data!
 			</p>
 			<input
 				type="password"
 				bind:value={restorePassword}
 				placeholder="Enter backup password"
-				class="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+				class="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
 				onkeydown={(e) => e.key === 'Enter' && confirmRestoreBackup()}
 			/>
 			<div class="flex gap-3">
@@ -465,7 +535,7 @@
 				<button
 					onclick={() => (showRestorePasswordModal = false)}
 					disabled={processingBackup}
-					class="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:bg-gray-100"
+					class="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
 				>
 					Cancel
 				</button>
@@ -484,20 +554,20 @@
 		aria-modal="true"
 		tabindex="-1"
 	>
-		<div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-			<h3 class="mb-4 text-xl font-semibold text-red-900">Delete All Data</h3>
-			<p class="mb-4 text-sm text-gray-700">
+		<div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+			<h3 class="mb-4 text-xl font-semibold text-red-900 dark:text-red-300">Delete All Data</h3>
+			<p class="mb-4 text-sm text-gray-700 dark:text-gray-300">
 				This will permanently delete all exercises, workouts, and workout logs. This action cannot
 				be undone.
 			</p>
-			<p class="mb-2 text-sm font-medium text-gray-900">
-				Type <span class="font-bold text-red-600">DELETE</span> to confirm:
+			<p class="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+				Type <span class="font-bold text-red-600 dark:text-red-400">DELETE</span> to confirm:
 			</p>
 			<input
 				type="text"
 				bind:value={deleteConfirmText}
 				placeholder="Type DELETE"
-				class="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none"
+				class="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
 				onkeydown={(e) => e.key === 'Enter' && handleDeleteAllData()}
 			/>
 			<div class="flex gap-3">
@@ -513,7 +583,7 @@
 						showDeleteModal = false;
 						deleteConfirmText = '';
 					}}
-					class="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+					class="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
 				>
 					Cancel
 				</button>

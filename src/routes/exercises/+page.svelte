@@ -69,7 +69,7 @@
 
 <div class="container mx-auto max-w-6xl px-4 py-4 sm:py-8">
 	<div class="mb-4 flex items-center justify-between gap-2 sm:mb-6">
-		<h1 class="text-2xl font-bold sm:text-3xl">Exercise Library</h1>
+		<h1 class="text-2xl font-bold sm:text-3xl dark:text-gray-100">Exercise Library</h1>
 		<button
 			onclick={handleAdd}
 			class="flex-shrink-0 rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700 sm:px-4 sm:text-base"
@@ -86,21 +86,25 @@
 			bind:value={searchQuery}
 			oninput={handleSearch}
 			placeholder="Search exercises..."
-			class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none sm:px-4 sm:text-base"
+			class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none sm:px-4 sm:text-base dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400"
 		/>
 	</div>
 
 	<!-- Loading State -->
 	{#if loading}
 		<div class="flex items-center justify-center py-12">
-			<div class="text-gray-500">Loading exercises...</div>
+			<div class="text-gray-500 dark:text-gray-400">Loading exercises...</div>
 		</div>
 	{/if}
 
 	<!-- Empty State -->
 	{#if !loading && filteredExercises.length === 0 && !searchQuery}
-		<div class="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-			<p class="mb-4 text-gray-600">No exercises yet. Add your first exercise to get started!</p>
+		<div
+			class="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-700"
+		>
+			<p class="mb-4 text-gray-600 dark:text-gray-300">
+				No exercises yet. Add your first exercise to get started!
+			</p>
 			<button
 				onclick={handleAdd}
 				class="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
@@ -113,7 +117,7 @@
 	<!-- No Search Results -->
 	{#if !loading && filteredExercises.length === 0 && searchQuery}
 		<div class="py-12 text-center">
-			<p class="text-gray-600">No exercises found matching "{searchQuery}"</p>
+			<p class="text-gray-600 dark:text-gray-300">No exercises found matching "{searchQuery}"</p>
 		</div>
 	{/if}
 
@@ -122,16 +126,18 @@
 		<div class="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
 			{#each filteredExercises as exercise (exercise.id)}
 				<div
-					class="rounded-lg border border-gray-200 bg-white p-3 shadow-sm hover:shadow-md sm:p-4"
+					class="rounded-lg border border-gray-200 bg-white p-3 shadow-sm hover:shadow-md sm:p-4 dark:border-gray-700 dark:bg-gray-800"
 				>
 					<div class="mb-2 flex items-start justify-between gap-2">
-						<h3 class="min-w-0 flex-1 truncate text-base font-semibold sm:text-lg">
+						<h3
+							class="min-w-0 flex-1 truncate text-base font-semibold sm:text-lg dark:text-gray-100"
+						>
 							{exercise.name}
 						</h3>
 						<div class="flex flex-shrink-0 gap-2">
 							<button
 								onclick={() => handleEdit(exercise)}
-								class="text-blue-600 hover:text-blue-800"
+								class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
 								aria-label="Edit exercise"
 							>
 								<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +151,7 @@
 							</button>
 							<button
 								onclick={() => handleDelete(exercise)}
-								class="text-red-600 hover:text-red-800"
+								class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
 								aria-label="Delete exercise"
 							>
 								<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,7 +165,9 @@
 							</button>
 						</div>
 					</div>
-					<p class="mb-3 text-xs break-words text-gray-600 sm:text-sm">{exercise.description}</p>
+					<p class="mb-3 text-xs break-words text-gray-600 sm:text-sm dark:text-gray-300">
+						{exercise.description}
+					</p>
 					{#if exercise.videoLink}
 						<VideoPlayer url={exercise.videoLink} />
 					{/if}

@@ -2,7 +2,8 @@ import { db } from './database';
 import type { Settings } from '$lib/types';
 
 const DEFAULT_SETTINGS: Omit<Settings, 'id' | 'createdAt' | 'updatedAt'> = {
-	unitPreference: 'imperial'
+	unitPreference: 'imperial',
+	theme: 'system'
 };
 
 export async function getSettings(): Promise<Settings> {
@@ -16,7 +17,20 @@ export async function getSettings(): Promise<Settings> {
 		});
 		return { id, ...DEFAULT_SETTINGS, createdAt: new Date(), updatedAt: new Date() };
 	}
-	return settings[0];
+
+	// Migrate existing settings if theme field is missing
+	const existingSettings = settings[0];
+	if (!existingSettings.theme) {
+		existingSettings.theme = DEFAULT_SETTINGS.theme;
+		if (existingSettings.id) {
+			await db.settings.update(existingSettings.id, {
+				theme: existingSettings.theme,
+				updatedAt: new Date()
+			});
+		}
+	}
+
+	return existingSettings;
 }
 
 export async function updateSettings(

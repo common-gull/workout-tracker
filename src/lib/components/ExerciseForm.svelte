@@ -72,11 +72,11 @@
 >
 	<!-- Modal Content -->
 	<div
-		class="flex h-full w-full max-w-md flex-col bg-white shadow-xl sm:h-auto sm:rounded-lg sm:p-6"
+		class="flex h-full w-full max-w-md flex-col bg-white shadow-xl sm:h-auto sm:rounded-lg sm:p-6 dark:bg-gray-800"
 		role="document"
 	>
 		<div class="flex-1 overflow-y-auto p-4 sm:p-0">
-			<h2 id="form-title" class="mb-4 text-xl font-bold sm:text-2xl">
+			<h2 id="form-title" class="mb-4 text-xl font-bold sm:text-2xl dark:text-gray-100">
 				{exercise ? 'Edit Exercise' : 'Add Exercise'}
 			</h2>
 
@@ -88,7 +88,7 @@
 			>
 				<!-- Name -->
 				<div class="mb-4">
-					<label for="name" class="mb-1 block text-sm font-medium text-gray-700">
+					<label for="name" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
 						Exercise Name *
 					</label>
 					<input
@@ -96,7 +96,7 @@
 						type="text"
 						bind:value={name}
 						placeholder="e.g. Bench Press"
-						class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+						class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
 						class:border-red-500={errors.name}
 					/>
 					{#if errors.name}
@@ -106,7 +106,10 @@
 
 				<!-- Description -->
 				<div class="mb-4">
-					<label for="description" class="mb-1 block text-sm font-medium text-gray-700">
+					<label
+						for="description"
+						class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+					>
 						Description *
 					</label>
 					<textarea
@@ -114,7 +117,7 @@
 						bind:value={description}
 						placeholder="Describe the exercise..."
 						rows="3"
-						class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+						class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
 						class:border-red-500={errors.description}
 					></textarea>
 					{#if errors.description}
@@ -124,7 +127,10 @@
 
 				<!-- Video Link -->
 				<div class="mb-6">
-					<label for="videoLink" class="mb-1 block text-sm font-medium text-gray-700">
+					<label
+						for="videoLink"
+						class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+					>
 						Video Link (optional)
 					</label>
 					<input
@@ -132,19 +138,19 @@
 						type="url"
 						bind:value={videoLink}
 						placeholder="https://youtube.com/watch?v=..."
-						class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+						class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
 					/>
 				</div>
 
 				<!-- Actions -->
 				<div
-					class="mt-6 flex justify-end gap-3 border-t border-gray-200 pt-4 sm:mt-0 sm:border-t-0 sm:pt-0"
+					class="mt-6 flex justify-end gap-3 border-t border-gray-200 pt-4 sm:mt-0 sm:border-t-0 sm:pt-0 dark:border-gray-700"
 				>
 					<button
 						type="button"
 						onclick={onCancel}
 						disabled={saving}
-						class="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+						class="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
 					>
 						Cancel
 					</button>
