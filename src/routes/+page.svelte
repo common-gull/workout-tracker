@@ -10,6 +10,8 @@
 	let loading = $state(true);
 	let showWorkoutForm = $state(false);
 	let editingWorkout = $state<Workout | null>(null);
+	// Track expanded exercises: workoutId -> array of exerciseIndexes
+	let expandedExercises = $state<Record<number, number[]>>({});
 
 	onMount(async () => {
 		await loadWorkouts();
@@ -137,6 +139,19 @@
 	function isWorkoutComplete(workout: Workout): boolean {
 		const { completed, total } = getCompletedSets(workout);
 		return total > 0 && completed === total;
+	}
+
+	function toggleExercise(workoutId: number, exerciseIndex: number) {
+		const workoutExpanded = expandedExercises[workoutId] || [];
+		if (workoutExpanded.includes(exerciseIndex)) {
+			expandedExercises[workoutId] = workoutExpanded.filter((i) => i !== exerciseIndex);
+		} else {
+			expandedExercises[workoutId] = [...workoutExpanded, exerciseIndex];
+		}
+	}
+
+	function isExerciseExpanded(workoutId: number, exerciseIndex: number): boolean {
+		return expandedExercises[workoutId]?.includes(exerciseIndex) || false;
 	}
 
 	function handleAddWorkout() {
@@ -277,155 +292,209 @@
 						</div>
 					</div>
 
-					<!-- Exercises -->
-					<div class="divide-y divide-gray-200">
-						{#each workout.exercises as exercise, exerciseIndex (exercise.exerciseId)}
-							{@const lastPerformance = getLastExercisePerformance(exercise.exerciseId)}
-							<div class="px-6 py-4">
-								<div class="mb-3">
-									<h3 class="text-lg font-semibold text-gray-900">{exercise.exerciseName}</h3>
-									{#if lastPerformance}
-										<div class="mt-2 rounded-md bg-gray-100 p-3">
-											<p class="mb-2 text-xs font-medium tracking-wide text-gray-600 uppercase">
-												Last workout ({new Date(lastPerformance.date).toLocaleDateString('en-US', {
-													month: 'short',
-													day: 'numeric'
-												})}):
-											</p>
-											<div class="flex flex-wrap gap-2">
-												{#each lastPerformance.sets as set, idx (idx)}
-													<span
-														class="inline-flex items-center rounded bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700"
-													>
-														Set {idx + 1}: {set.weight} lbs × {set.reps} reps
-													</span>
-												{/each}
-											</div>
-										</div>
-									{/if}
-								</div>
-								<div class="space-y-2">
-									{#each exercise.sets as set, setIndex (setIndex)}
-										<div
-											class="flex items-center justify-between rounded-lg border p-3 transition-colors"
-											class:border-green-500={set.completed}
-											class:bg-green-50={set.completed}
-											class:border-gray-300={!set.completed}
-											class:bg-white={!set.completed}
-										>
-											<!-- Left side: Checkbox and Label -->
-											<div class="flex items-center gap-3">
-												<button
-													onclick={() => toggleSetComplete(workout, exerciseIndex, setIndex)}
-													class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors"
-													class:border-green-500={set.completed}
-													class:bg-green-500={set.completed}
-													class:border-gray-400={!set.completed}
-													class:bg-white={!set.completed}
-													aria-label="Toggle set completion"
-												>
-													{#if set.completed}
-														<svg
-															class="h-4 w-4 text-white"
-															fill="none"
-															stroke="currentColor"
-															viewBox="0 0 24 24"
-														>
-															<path
-																stroke-linecap="round"
-																stroke-linejoin="round"
-																stroke-width="3"
-																d="M5 13l4 4L19 7"
-															/>
-														</svg>
-													{/if}
-												</button>
-												<span class="font-medium text-gray-900">Set {setIndex + 1}</span>
-											</div>
-
-											<!-- Right side: Inputs -->
-											<div class="flex items-center gap-3">
-												<!-- Weight Input -->
-												<div class="flex items-center gap-2">
-													<input
-														type="number"
-														value={set.weight}
-														onchange={(e) =>
-															updateSetValue(
-																workout,
-																exerciseIndex,
-																setIndex,
-																'weight',
-																Number(e.currentTarget.value)
-															)}
-														onclick={(e) => e.stopPropagation()}
-														class="w-20 rounded border border-gray-300 px-2 py-1 text-center text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-														class:border-green-500={set.completed}
-														class:bg-white={set.completed}
-														min="0"
-														step="5"
-													/>
-													<span class="text-sm text-gray-600">lbs</span>
-												</div>
-
-												<!-- Reps Input -->
-												<div class="flex items-center gap-2">
-													<input
-														type="number"
-														value={set.reps}
-														onchange={(e) =>
-															updateSetValue(
-																workout,
-																exerciseIndex,
-																setIndex,
-																'reps',
-																Number(e.currentTarget.value)
-															)}
-														onclick={(e) => e.stopPropagation()}
-														class="w-16 rounded border border-gray-300 px-2 py-1 text-center text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-														class:border-green-500={set.completed}
-														class:bg-white={set.completed}
-														min="0"
-														step="1"
-													/>
-													<span class="text-sm text-gray-600">reps</span>
-												</div>
-											</div>
-										</div>
-									{/each}
-								</div>
-
-								<!-- Exercise Notes -->
-								<div class="mt-3">
-									<label
-										for="exercise-notes-{workout.id}-{exerciseIndex}"
-										class="mb-1 block text-sm font-medium text-gray-700"
-									>
-										Notes for this exercise
-									</label>
-									<textarea
-										id="exercise-notes-{workout.id}-{exerciseIndex}"
-										value={exercise.notes || ''}
-										onchange={(e) =>
-											updateExerciseNotes(workout, exerciseIndex, e.currentTarget.value)}
-										placeholder="Add notes about form, difficulty, adjustments, etc..."
-										rows="2"
-										class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-									></textarea>
-								</div>
-							</div>
-						{/each}
-					</div>
-
 					<!-- Workout Notes -->
 					{#if workout.notes}
-						<div class="border-t border-gray-200 bg-gray-50 px-6 py-3">
-							<p class="text-sm text-gray-600">
-								<span class="font-medium">Notes:</span>
+						<div class="border-b border-gray-200 bg-blue-50 px-6 py-3">
+							<p class="text-sm text-gray-700">
+								<span class="font-semibold text-gray-900">Workout Notes:</span>
 								{workout.notes}
 							</p>
 						</div>
 					{/if}
+
+					<!-- Exercises -->
+					<div class="divide-y divide-gray-200">
+						{#each workout.exercises as exercise, exerciseIndex (exercise.exerciseId)}
+							{@const lastPerformance = getLastExercisePerformance(exercise.exerciseId)}
+							{@const isExpanded = isExerciseExpanded(workout.id!, exerciseIndex)}
+							{@const exerciseStats = {
+								completed: exercise.sets.filter((s) => s.completed).length,
+								total: exercise.sets.length
+							}}
+							{@const isExerciseComplete = exerciseStats.completed === exerciseStats.total}
+							<div class="px-6 py-4">
+								<!-- Exercise Header (Collapsible) -->
+								<button
+									onclick={() => toggleExercise(workout.id!, exerciseIndex)}
+									class="flex w-full items-center justify-between gap-3 text-left"
+								>
+									<div class="flex flex-1 items-center gap-3">
+										<svg
+											class="h-5 w-5 flex-shrink-0 text-gray-500 transition-transform"
+											class:rotate-90={isExpanded}
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M9 5l7 7-7 7"
+											/>
+										</svg>
+										<h3 class="text-lg font-semibold text-gray-900">{exercise.exerciseName}</h3>
+										{#if isExerciseComplete}
+											<span
+												class="flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700"
+											>
+												<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M5 13l4 4L19 7"
+													/>
+												</svg>
+												Done
+											</span>
+										{/if}
+									</div>
+									<span class="text-sm text-gray-600">
+										{exerciseStats.completed}/{exerciseStats.total} sets
+									</span>
+								</button>
+
+								<!-- Exercise Content (Collapsible) -->
+								{#if isExpanded}
+									<div class="mt-3">
+										{#if lastPerformance}
+											<div class="mb-3 rounded-md bg-gray-100 p-3">
+												<p class="mb-2 text-xs font-medium tracking-wide text-gray-600 uppercase">
+													Last workout ({new Date(lastPerformance.date).toLocaleDateString(
+														'en-US',
+														{
+															month: 'short',
+															day: 'numeric'
+														}
+													)}):
+												</p>
+												<div class="flex flex-wrap gap-2">
+													{#each lastPerformance.sets as set, idx (idx)}
+														<span
+															class="inline-flex items-center rounded bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700"
+														>
+															Set {idx + 1}: {set.weight} lbs × {set.reps} reps
+														</span>
+													{/each}
+												</div>
+											</div>
+										{/if}
+
+										<div class="space-y-2">
+											{#each exercise.sets as set, setIndex (setIndex)}
+												<div
+													class="flex items-center justify-between rounded-lg border p-3 transition-colors"
+													class:border-green-500={set.completed}
+													class:bg-green-50={set.completed}
+													class:border-gray-300={!set.completed}
+													class:bg-white={!set.completed}
+												>
+													<!-- Left side: Checkbox and Label -->
+													<div class="flex items-center gap-3">
+														<button
+															onclick={() => toggleSetComplete(workout, exerciseIndex, setIndex)}
+															class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors"
+															class:border-green-500={set.completed}
+															class:bg-green-500={set.completed}
+															class:border-gray-400={!set.completed}
+															class:bg-white={!set.completed}
+															aria-label="Toggle set completion"
+														>
+															{#if set.completed}
+																<svg
+																	class="h-4 w-4 text-white"
+																	fill="none"
+																	stroke="currentColor"
+																	viewBox="0 0 24 24"
+																>
+																	<path
+																		stroke-linecap="round"
+																		stroke-linejoin="round"
+																		stroke-width="3"
+																		d="M5 13l4 4L19 7"
+																	/>
+																</svg>
+															{/if}
+														</button>
+														<span class="font-medium text-gray-900">Set {setIndex + 1}</span>
+													</div>
+
+													<!-- Right side: Inputs -->
+													<div class="flex items-center gap-3">
+														<!-- Weight Input -->
+														<div class="flex items-center gap-2">
+															<input
+																type="number"
+																value={set.weight}
+																onchange={(e) =>
+																	updateSetValue(
+																		workout,
+																		exerciseIndex,
+																		setIndex,
+																		'weight',
+																		Number(e.currentTarget.value)
+																	)}
+																onclick={(e) => e.stopPropagation()}
+																class="w-20 rounded border border-gray-300 px-2 py-1 text-center text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+																class:border-green-500={set.completed}
+																class:bg-white={set.completed}
+																min="0"
+																step="5"
+															/>
+															<span class="text-sm text-gray-600">lbs</span>
+														</div>
+
+														<!-- Reps Input -->
+														<div class="flex items-center gap-2">
+															<input
+																type="number"
+																value={set.reps}
+																onchange={(e) =>
+																	updateSetValue(
+																		workout,
+																		exerciseIndex,
+																		setIndex,
+																		'reps',
+																		Number(e.currentTarget.value)
+																	)}
+																onclick={(e) => e.stopPropagation()}
+																class="w-16 rounded border border-gray-300 px-2 py-1 text-center text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+																class:border-green-500={set.completed}
+																class:bg-white={set.completed}
+																min="0"
+																step="1"
+															/>
+															<span class="text-sm text-gray-600">reps</span>
+														</div>
+													</div>
+												</div>
+											{/each}
+										</div>
+
+										<!-- Exercise Notes -->
+										<div class="mt-3">
+											<label
+												for="exercise-notes-{workout.id}-{exerciseIndex}"
+												class="mb-1 block text-sm font-medium text-gray-700"
+											>
+												Notes for this exercise
+											</label>
+											<textarea
+												id="exercise-notes-{workout.id}-{exerciseIndex}"
+												value={exercise.notes || ''}
+												onchange={(e) =>
+													updateExerciseNotes(workout, exerciseIndex, e.currentTarget.value)}
+												placeholder="Add notes about form, difficulty, adjustments, etc..."
+												rows="2"
+												class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+											></textarea>
+										</div>
+									</div>
+								{/if}
+							</div>
+						{/each}
+					</div>
 				</div>
 			{/each}
 
