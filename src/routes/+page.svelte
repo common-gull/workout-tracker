@@ -1,8 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { getWorkoutsByDate, updateWorkout, getWorkoutsSortedByDate } from '$lib/db';
-	import type { Workout } from '$lib/types';
+	import {
+		getWorkoutsByDate,
+		updateWorkout,
+		getWorkoutsSortedByDate,
+		getAllExercises
+	} from '$lib/db';
+	import type { Workout, Exercise } from '$lib/types';
 	import WorkoutForm from '$lib/components/WorkoutForm.svelte';
+	import ExerciseDetailModal from '$lib/components/ExerciseDetailModal.svelte';
 
 	let today = $state(new Date().toISOString().split('T')[0]);
 	let workouts = $state<Workout[]>([]);
@@ -12,10 +18,13 @@
 	let editingWorkout = $state<Workout | null>(null);
 	// Track expanded exercises: workoutId -> array of exerciseIndexes
 	let expandedExercises = $state<Record<number, number[]>>({});
+	let selectedExerciseDetail = $state<Exercise | null>(null);
+	let allExercises = $state<Exercise[]>([]);
 
 	onMount(async () => {
 		await loadWorkouts();
 		await loadPreviousWorkouts();
+		allExercises = await getAllExercises();
 	});
 
 	async function loadWorkouts() {
@@ -152,6 +161,13 @@
 
 	function isExerciseExpanded(workoutId: number, exerciseIndex: number): boolean {
 		return expandedExercises[workoutId]?.includes(exerciseIndex) || false;
+	}
+
+	function viewExerciseDetail(exerciseId: number) {
+		const exercise = allExercises.find((e) => e.id === exerciseId);
+		if (exercise) {
+			selectedExerciseDetail = exercise;
+		}
 	}
 
 	function handleAddWorkout() {
@@ -319,48 +335,70 @@
 							{@const isExerciseComplete = exerciseStats.completed === exerciseStats.total}
 							<div class="px-4 py-3 sm:px-6 sm:py-4">
 								<!-- Exercise Header (Collapsible) -->
-								<button
-									onclick={() => toggleExercise(workout.id!, exerciseIndex)}
-									class="flex w-full items-center justify-between gap-2 text-left sm:gap-3"
-								>
-									<div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
-										<svg
-											class="h-4 w-4 flex-shrink-0 text-gray-500 transition-transform sm:h-5 sm:w-5"
-											class:rotate-90={isExpanded}
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
+								<div class="flex items-center gap-2">
+									<button
+										onclick={() => toggleExercise(workout.id!, exerciseIndex)}
+										class="flex min-w-0 flex-1 items-center justify-between gap-2 text-left sm:gap-3"
+									>
+										<div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+											<svg
+												class="h-4 w-4 flex-shrink-0 text-gray-500 transition-transform sm:h-5 sm:w-5"
+												class:rotate-90={isExpanded}
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M9 5l7 7-7 7"
+												/>
+											</svg>
+											<h3 class="truncate text-base font-semibold text-gray-900 sm:text-lg">
+												{exercise.exerciseName}
+											</h3>
+											{#if isExerciseComplete}
+												<span
+													class="flex flex-shrink-0 items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700"
+												>
+													<svg
+														class="h-3 w-3"
+														fill="none"
+														stroke="currentColor"
+														viewBox="0 0 24 24"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M5 13l4 4L19 7"
+														/>
+													</svg>
+													<span class="hidden sm:inline">Done</span>
+												</span>
+											{/if}
+										</div>
+										<span class="flex-shrink-0 text-xs text-gray-600 sm:text-sm">
+											{exerciseStats.completed}/{exerciseStats.total}
+										</span>
+									</button>
+									<button
+										onclick={() => viewExerciseDetail(exercise.exerciseId)}
+										class="flex-shrink-0 rounded-lg p-1.5 text-blue-600 hover:bg-blue-50"
+										aria-label="View exercise details"
+										title="View details & video"
+									>
+										<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path
 												stroke-linecap="round"
 												stroke-linejoin="round"
 												stroke-width="2"
-												d="M9 5l7 7-7 7"
+												d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 											/>
 										</svg>
-										<h3 class="truncate text-base font-semibold text-gray-900 sm:text-lg">
-											{exercise.exerciseName}
-										</h3>
-										{#if isExerciseComplete}
-											<span
-												class="flex flex-shrink-0 items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700"
-											>
-												<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-													<path
-														stroke-linecap="round"
-														stroke-linejoin="round"
-														stroke-width="2"
-														d="M5 13l4 4L19 7"
-													/>
-												</svg>
-												<span class="hidden sm:inline">Done</span>
-											</span>
-										{/if}
-									</div>
-									<span class="flex-shrink-0 text-xs text-gray-600 sm:text-sm">
-										{exerciseStats.completed}/{exerciseStats.total}
-									</span>
-								</button>
+									</button>
+								</div>
 
 								<!-- Exercise Content (Collapsible) -->
 								{#if isExpanded}
@@ -526,12 +564,19 @@
 	{/if}
 </div>
 
-<!-- Modal -->
+<!-- Modals -->
 {#if showWorkoutForm}
 	<WorkoutForm
 		workout={editingWorkout}
 		date={today}
 		onSaved={handleWorkoutSaved}
 		onCancel={handleCancel}
+	/>
+{/if}
+
+{#if selectedExerciseDetail}
+	<ExerciseDetailModal
+		exercise={selectedExerciseDetail}
+		onClose={() => (selectedExerciseDetail = null)}
 	/>
 {/if}

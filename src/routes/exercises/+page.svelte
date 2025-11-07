@@ -4,6 +4,7 @@
 	import type { Exercise } from '$lib/types';
 	import ExerciseForm from '$lib/components/ExerciseForm.svelte';
 	import DeleteModal from '$lib/components/DeleteModal.svelte';
+	import VideoPlayer from '$lib/components/VideoPlayer.svelte';
 
 	let exercises: Exercise[] = [];
 	let filteredExercises: Exercise[] = [];
@@ -158,17 +159,9 @@
 							</button>
 						</div>
 					</div>
-					<p class="mb-2 text-xs break-words text-gray-600 sm:text-sm">{exercise.description}</p>
+					<p class="mb-3 text-xs break-words text-gray-600 sm:text-sm">{exercise.description}</p>
 					{#if exercise.videoLink}
-						<a
-							href={exercise.videoLink}
-							target="_blank"
-							rel="noopener noreferrer"
-							data-sveltekit-reload
-							class="text-sm text-blue-600 hover:underline"
-						>
-							View Video
-						</a>
+						<VideoPlayer url={exercise.videoLink} />
 					{/if}
 				</div>
 			{/each}
