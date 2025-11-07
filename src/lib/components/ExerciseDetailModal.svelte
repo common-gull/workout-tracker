@@ -66,7 +66,7 @@
 				>
 					Description
 				</h3>
-				<p class="whitespace-pre-wrap break-words text-base text-gray-700 dark:text-gray-300">
+				<p class="text-base break-words whitespace-pre-wrap text-gray-700 dark:text-gray-300">
 					{exercise.description}
 				</p>
 			</div>

@@ -416,4 +416,3 @@ Push-ups,,https://example.com/video`;
 		});
 	});
 });
-

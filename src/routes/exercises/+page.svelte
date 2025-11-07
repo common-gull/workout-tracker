@@ -4,7 +4,6 @@
 	import type { Exercise } from '$lib/types';
 	import ExerciseForm from '$lib/components/ExerciseForm.svelte';
 	import DeleteModal from '$lib/components/DeleteModal.svelte';
-	import VideoPlayer from '$lib/components/VideoPlayer.svelte';
 	import ExerciseDetailModal from '$lib/components/ExerciseDetailModal.svelte';
 
 	let exercises = $state<Exercise[]>([]);
@@ -14,7 +13,6 @@
 	let editingExercise = $state<Exercise | null>(null);
 	let deleteTarget = $state<Exercise | null>(null);
 	let loading = $state(true);
-	let expandedCards = $state<Set<number>>(new Set());
 	let selectedExercise = $state<Exercise | null>(null);
 
 	onMount(async () => {
@@ -69,20 +67,6 @@
 		editingExercise = null;
 	}
 
-	function toggleCard(exerciseId: number) {
-		const newExpanded = new Set(expandedCards);
-		if (newExpanded.has(exerciseId)) {
-			newExpanded.delete(exerciseId);
-		} else {
-			newExpanded.add(exerciseId);
-		}
-		expandedCards = newExpanded;
-	}
-
-	function isCardExpanded(exerciseId: number): boolean {
-		return expandedCards.has(exerciseId);
-	}
-
 	function viewDetails(exercise: Exercise) {
 		selectedExercise = exercise;
 	}
@@ -98,7 +82,7 @@
 	}
 </script>
 
-<div class="container mx-auto max-w-6xl px-4 py-4 sm:py-8">
+<div class="container mx-auto max-w-7xl px-4 py-4 sm:py-8">
 	<div class="mb-4 flex items-center justify-between gap-2 sm:mb-6">
 		<h1 class="text-2xl font-bold sm:text-3xl dark:text-gray-100">Exercise Library</h1>
 		<button
@@ -156,36 +140,16 @@
 	{#if !loading && filteredExercises.length > 0}
 		<div class="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
 			{#each filteredExercises as exercise (exercise.id)}
-				{@const isExpanded = isCardExpanded(exercise.id!)}
 				{@const maxDescriptionLength = 120}
 				<div
-					class="rounded-lg border border-gray-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md sm:p-4 dark:border-gray-700 dark:bg-gray-800"
+					class="min-w-0 rounded-lg border border-gray-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md sm:p-4 dark:border-gray-700 dark:bg-gray-800"
 				>
 					<div class="mb-2 flex items-start justify-between gap-2">
-						<button
-							onclick={() => toggleCard(exercise.id!)}
-							class="min-w-0 flex-1 text-left"
+						<h3
+							class="min-w-0 flex-1 truncate text-base font-semibold sm:text-lg dark:text-gray-100"
 						>
-							<h3
-								class="flex items-center gap-2 text-base font-semibold sm:text-lg dark:text-gray-100"
-							>
-								<svg
-									class="h-4 w-4 flex-shrink-0 text-gray-400 transition-transform"
-									class:rotate-90={isExpanded}
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M9 5l7 7-7 7"
-									/>
-								</svg>
-								<span class="truncate">{exercise.name}</span>
-							</h3>
-						</button>
+							{exercise.name}
+						</h3>
 						<div class="flex flex-shrink-0 gap-2">
 							<button
 								onclick={() => viewDetails(exercise)}
@@ -233,40 +197,10 @@
 						</div>
 					</div>
 
-					<!-- Collapsed view: truncated description -->
-					{#if !isExpanded}
-						<p class="mb-2 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
-							{truncateText(exercise.description, maxDescriptionLength)}
-						</p>
-						{#if exercise.description.length > maxDescriptionLength || exercise.videoLink}
-							<button
-								onclick={() => toggleCard(exercise.id!)}
-								class="text-xs text-blue-600 hover:underline dark:text-blue-400"
-							>
-								Show more
-							</button>
-						{/if}
-					{/if}
-
-					<!-- Expanded view: full description and video -->
-					{#if isExpanded}
-						<p
-							class="mb-3 whitespace-pre-wrap break-words text-xs text-gray-600 sm:text-sm dark:text-gray-300"
-						>
-							{exercise.description}
-						</p>
-						{#if exercise.videoLink}
-							<div class="mb-2">
-								<VideoPlayer url={exercise.videoLink} />
-							</div>
-						{/if}
-						<button
-							onclick={() => toggleCard(exercise.id!)}
-							class="text-xs text-blue-600 hover:underline dark:text-blue-400"
-						>
-							Show less
-						</button>
-					{/if}
+					<!-- Truncated description -->
+					<p class="text-xs text-gray-600 sm:text-sm dark:text-gray-400">
+						{truncateText(exercise.description, maxDescriptionLength)}
+					</p>
 				</div>
 			{/each}
 		</div>

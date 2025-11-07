@@ -202,14 +202,35 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 			}
 
 			// Support both old format (8 columns) and new format (10 columns)
-			let date, workoutName, exerciseName, setNumberStr, weightStr, weightUnit, repsStr, durationStr, instructions, notes;
-			
+			let date,
+				workoutName,
+				exerciseName,
+				setNumberStr,
+				weightStr,
+				weightUnit,
+				repsStr,
+				durationStr,
+				instructions,
+				notes;
+
 			if (values.length >= 10) {
 				// New format: date,workoutName,exerciseName,setNumber,weight,weightUnit,reps,duration,instructions,notes
-				[date, workoutName, exerciseName, setNumberStr, weightStr, weightUnit, repsStr, durationStr, instructions, notes] = values;
+				[
+					date,
+					workoutName,
+					exerciseName,
+					setNumberStr,
+					weightStr,
+					weightUnit,
+					repsStr,
+					durationStr,
+					instructions,
+					notes
+				] = values;
 			} else {
 				// Old format: date,workoutName,exerciseName,setNumber,weight,reps,instructions,notes
-				[date, workoutName, exerciseName, setNumberStr, weightStr, repsStr, instructions, notes] = values;
+				[date, workoutName, exerciseName, setNumberStr, weightStr, repsStr, instructions, notes] =
+					values;
 				weightUnit = 'lb'; // Default to pounds for old format
 				durationStr = '';
 			}
@@ -307,18 +328,18 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 					// Sort sets by set number
 					sets.sort((a, b) => a.setNumber - b.setNumber);
 
-				return {
-					exerciseId: exercise.id!,
-					exerciseName: exercise.name,
-					sets: sets.map((s) => ({ 
-						weight: s.weight, 
-						reps: s.reps, 
-						duration: s.duration,
-						completed: false 
-					})),
-					instructions: sets[0]?.instructions,
-					notes: sets[0]?.notes
-				};
+					return {
+						exerciseId: exercise.id!,
+						exerciseName: exercise.name,
+						sets: sets.map((s) => ({
+							weight: s.weight,
+							reps: s.reps,
+							duration: s.duration,
+							completed: false
+						})),
+						instructions: sets[0]?.instructions,
+						notes: sets[0]?.notes
+					};
 				}
 			);
 
@@ -371,4 +392,3 @@ function escapeCsvValue(value: string): string {
 
 	return value;
 }
-

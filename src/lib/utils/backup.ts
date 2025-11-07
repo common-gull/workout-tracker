@@ -3,14 +3,15 @@
  */
 
 import { db } from '$lib/db/database';
+import type { Exercise, Workout, WorkoutLog, Settings } from '$lib/types';
 
 interface BackupData {
 	version: number;
 	timestamp: string;
-	exercises: unknown[];
-	workouts: unknown[];
-	workoutLogs: unknown[];
-	settings: unknown[];
+	exercises: Exercise[];
+	workouts: Workout[];
+	workoutLogs: WorkoutLog[];
+	settings: Settings[];
 }
 
 /**

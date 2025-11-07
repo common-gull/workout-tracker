@@ -206,7 +206,7 @@
 	}
 </script>
 
-<div class="container mx-auto max-w-4xl p-4">
+<div class="container mx-auto max-w-7xl p-4">
 	<!-- Header -->
 	<div class="mb-6">
 		<h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Today's Workouts</h1>
@@ -337,7 +337,7 @@
 						>
 							<p class="text-sm text-gray-700 dark:text-gray-300">
 								<span class="font-semibold text-gray-900 dark:text-gray-100">Workout Notes:</span>
-								<span class="whitespace-pre-wrap break-words">{workout.notes}</span>
+								<span class="break-words whitespace-pre-wrap">{workout.notes}</span>
 							</p>
 						</div>
 					{/if}
@@ -432,7 +432,9 @@
 												>
 													Instructions
 												</p>
-												<p class="mt-1 whitespace-pre-wrap text-sm text-amber-900 dark:text-amber-200">
+												<p
+													class="mt-1 text-sm whitespace-pre-wrap text-amber-900 dark:text-amber-200"
+												>
 													{exercise.instructions}
 												</p>
 											</div>

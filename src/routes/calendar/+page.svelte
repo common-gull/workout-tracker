@@ -135,7 +135,7 @@
 	}
 </script>
 
-<div class="container mx-auto max-w-4xl p-4">
+<div class="container mx-auto max-w-7xl p-4">
 	<!-- Header -->
 	<div class="mb-6 flex items-center justify-between">
 		<h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
@@ -272,12 +272,16 @@
 															</span>
 														</div>
 														{#if exercise.instructions}
-															<div class="mt-1 whitespace-pre-wrap text-xs text-amber-700 dark:text-amber-400">
+															<div
+																class="mt-1 text-xs whitespace-pre-wrap text-amber-700 dark:text-amber-400"
+															>
 																{exercise.instructions}
 															</div>
 														{/if}
 														{#if exercise.notes}
-															<div class="mt-1 whitespace-pre-wrap text-xs italic text-blue-600 dark:text-blue-400">
+															<div
+																class="mt-1 text-xs whitespace-pre-wrap text-blue-600 italic dark:text-blue-400"
+															>
 																"{exercise.notes}"
 															</div>
 														{/if}
@@ -285,11 +289,11 @@
 												{/each}
 											</div>
 										{/if}
-									{#if workout.notes}
-										<p class="mt-2 whitespace-pre-wrap text-sm text-blue-600 dark:text-blue-400">
-											{workout.notes}
-										</p>
-									{/if}
+										{#if workout.notes}
+											<p class="mt-2 text-sm whitespace-pre-wrap text-blue-600 dark:text-blue-400">
+												{workout.notes}
+											</p>
+										{/if}
 									</button>
 									<div class="flex gap-2">
 										<button

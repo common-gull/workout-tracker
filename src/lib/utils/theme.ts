@@ -83,7 +83,6 @@ export function initializeTheme(preference: ThemePreference): void {
 		};
 		mediaQuery.addEventListener('change', handleChange);
 
-		// Return cleanup function
-		return () => mediaQuery.removeEventListener('change', handleChange);
+		// Note: Cleanup not implemented as this listener persists for the app lifetime
 	}
 }
