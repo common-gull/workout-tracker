@@ -249,13 +249,20 @@
 									>
 										<h3 class="text-lg font-semibold text-blue-900">{workout.name}</h3>
 										{#if workout.exercises.length > 0}
-											<div class="mt-2 space-y-1">
+											<div class="mt-2 space-y-2">
 												{#each workout.exercises as exercise}
-													<div class="text-sm text-blue-700">
-														<span class="font-medium">{exercise.exerciseName}</span>
-														<span class="text-blue-600">
-															- {exercise.sets.length} set{exercise.sets.length !== 1 ? 's' : ''}
-														</span>
+													<div>
+														<div class="text-sm text-blue-700">
+															<span class="font-medium">{exercise.exerciseName}</span>
+															<span class="text-blue-600">
+																- {exercise.sets.length} set{exercise.sets.length !== 1 ? 's' : ''}
+															</span>
+														</div>
+														{#if exercise.notes}
+															<div class="mt-1 text-xs text-blue-600 italic">
+																"{exercise.notes}"
+															</div>
+														{/if}
 													</div>
 												{/each}
 											</div>

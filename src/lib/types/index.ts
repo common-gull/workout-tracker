@@ -23,6 +23,7 @@ export interface WorkoutExercise {
 	exerciseId: number;
 	exerciseName: string;
 	sets: Set[];
+	notes?: string;
 }
 
 // Workout represents a planned or completed workout
