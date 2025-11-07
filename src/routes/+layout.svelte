@@ -2,6 +2,7 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { page } from '$app/stores';
+	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
 	import { getSettings } from '$lib/db';
 	import { initializeTheme } from '$lib/utils/theme';
@@ -33,7 +34,7 @@
 		<div class="container mx-auto max-w-7xl px-4">
 			<div class="flex h-16 items-center justify-between">
 				<a
-					href="/"
+					href={resolve('/')}
 					data-sveltekit-preload-data
 					class="text-lg font-bold text-gray-900 sm:text-xl dark:text-gray-100"
 				>
@@ -43,42 +44,42 @@
 				<!-- Desktop Navigation -->
 				<div class="hidden gap-6 md:flex">
 					<a
-						href="/"
+						href={resolve('/')}
 						data-sveltekit-preload-data
 						class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
-						class:font-semibold={$page.url.pathname === '/'}
-						class:text-blue-600={$page.url.pathname === '/'}
-						class:dark:text-blue-400={$page.url.pathname === '/'}
+						class:font-semibold={$page.url.pathname === resolve('/')}
+						class:text-blue-600={$page.url.pathname === resolve('/')}
+						class:dark:text-blue-400={$page.url.pathname === resolve('/')}
 					>
 						Today
 					</a>
 					<a
-						href="/exercises"
+						href={resolve('/exercises')}
 						data-sveltekit-preload-data
 						class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
-						class:font-semibold={$page.url.pathname === '/exercises'}
-						class:text-blue-600={$page.url.pathname === '/exercises'}
-						class:dark:text-blue-400={$page.url.pathname === '/exercises'}
+						class:font-semibold={$page.url.pathname === resolve('/exercises')}
+						class:text-blue-600={$page.url.pathname === resolve('/exercises')}
+						class:dark:text-blue-400={$page.url.pathname === resolve('/exercises')}
 					>
 						Exercises
 					</a>
 					<a
-						href="/calendar"
+						href={resolve('/calendar')}
 						data-sveltekit-preload-data
 						class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
-						class:font-semibold={$page.url.pathname === '/calendar'}
-						class:text-blue-600={$page.url.pathname === '/calendar'}
-						class:dark:text-blue-400={$page.url.pathname === '/calendar'}
+						class:font-semibold={$page.url.pathname === resolve('/calendar')}
+						class:text-blue-600={$page.url.pathname === resolve('/calendar')}
+						class:dark:text-blue-400={$page.url.pathname === resolve('/calendar')}
 					>
 						Calendar
 					</a>
 					<a
-						href="/settings"
+						href={resolve('/settings')}
 						data-sveltekit-preload-data
 						class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
-						class:font-semibold={$page.url.pathname === '/settings'}
-						class:text-blue-600={$page.url.pathname === '/settings'}
-						class:dark:text-blue-400={$page.url.pathname === '/settings'}
+						class:font-semibold={$page.url.pathname === resolve('/settings')}
+						class:text-blue-600={$page.url.pathname === resolve('/settings')}
+						class:dark:text-blue-400={$page.url.pathname === resolve('/settings')}
 					>
 						Settings
 					</a>
@@ -117,42 +118,42 @@
 				<div class="border-t border-gray-200 py-4 md:hidden dark:border-gray-700">
 					<div class="flex flex-col space-y-4">
 						<a
-							href="/"
+							href={resolve('/')}
 							data-sveltekit-preload-data
 							class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
-							class:font-semibold={$page.url.pathname === '/'}
-							class:text-blue-600={$page.url.pathname === '/'}
-							class:dark:text-blue-400={$page.url.pathname === '/'}
+							class:font-semibold={$page.url.pathname === resolve('/')}
+							class:text-blue-600={$page.url.pathname === resolve('/')}
+							class:dark:text-blue-400={$page.url.pathname === resolve('/')}
 						>
 							Today
 						</a>
 						<a
-							href="/exercises"
+							href={resolve('/exercises')}
 							data-sveltekit-preload-data
 							class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
-							class:font-semibold={$page.url.pathname === '/exercises'}
-							class:text-blue-600={$page.url.pathname === '/exercises'}
-							class:dark:text-blue-400={$page.url.pathname === '/exercises'}
+							class:font-semibold={$page.url.pathname === resolve('/exercises')}
+							class:text-blue-600={$page.url.pathname === resolve('/exercises')}
+							class:dark:text-blue-400={$page.url.pathname === resolve('/exercises')}
 						>
 							Exercises
 						</a>
 						<a
-							href="/calendar"
+							href={resolve('/calendar')}
 							data-sveltekit-preload-data
 							class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
-							class:font-semibold={$page.url.pathname === '/calendar'}
-							class:text-blue-600={$page.url.pathname === '/calendar'}
-							class:dark:text-blue-400={$page.url.pathname === '/calendar'}
+							class:font-semibold={$page.url.pathname === resolve('/calendar')}
+							class:text-blue-600={$page.url.pathname === resolve('/calendar')}
+							class:dark:text-blue-400={$page.url.pathname === resolve('/calendar')}
 						>
 							Calendar
 						</a>
 						<a
-							href="/settings"
+							href={resolve('/settings')}
 							data-sveltekit-preload-data
 							class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
-							class:font-semibold={$page.url.pathname === '/settings'}
-							class:text-blue-600={$page.url.pathname === '/settings'}
-							class:dark:text-blue-400={$page.url.pathname === '/settings'}
+							class:font-semibold={$page.url.pathname === resolve('/settings')}
+							class:text-blue-600={$page.url.pathname === resolve('/settings')}
+							class:dark:text-blue-400={$page.url.pathname === resolve('/settings')}
 						>
 							Settings
 						</a>
