@@ -165,7 +165,7 @@
 							</button>
 						</div>
 					</div>
-					<p class="mb-3 text-xs break-words text-gray-600 sm:text-sm dark:text-gray-300">
+					<p class="mb-3 whitespace-pre-wrap break-words text-xs text-gray-600 sm:text-sm dark:text-gray-300">
 						{exercise.description}
 					</p>
 					{#if exercise.videoLink}

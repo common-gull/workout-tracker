@@ -2,6 +2,7 @@
  * CSV Import/Export utilities for exercises and workouts
  */
 
+import Papa from 'papaparse';
 import { addExercise, getAllExercises } from '$lib/db/exercises';
 import { addWorkout, getAllWorkouts } from '$lib/db/workouts';
 
@@ -35,7 +36,16 @@ export async function exportWorkoutsToCSV(): Promise<string> {
 	const workouts = await getAllWorkouts();
 
 	// CSV header
-	const headers = ['date', 'workoutName', 'exerciseName', 'setNumber', 'weight', 'reps', 'notes'];
+	const headers = [
+		'date',
+		'workoutName',
+		'exerciseName',
+		'setNumber',
+		'weight',
+		'reps',
+		'instructions',
+		'notes'
+	];
 	const rows = [headers.join(',')];
 
 	// CSV rows
@@ -50,6 +60,7 @@ export async function exportWorkoutsToCSV(): Promise<string> {
 					String(i + 1),
 					String(set.weight),
 					String(set.reps),
+					escapeCsvValue(exercise.instructions || ''),
 					escapeCsvValue(exercise.notes || '')
 				];
 				rows.push(row.join(','));
@@ -67,7 +78,18 @@ export async function importExercisesFromCSV(csvContent: string): Promise<{
 	success: number;
 	errors: string[];
 }> {
-	const lines = csvContent.trim().split('\n');
+	const parseResult = Papa.parse<string[]>(csvContent, {
+		skipEmptyLines: true
+	});
+
+	if (parseResult.errors.length > 0) {
+		return {
+			success: 0,
+			errors: parseResult.errors.map((err) => `Parse error at row ${err.row}: ${err.message}`)
+		};
+	}
+
+	const lines = parseResult.data;
 	if (lines.length < 2) {
 		return { success: 0, errors: ['CSV file is empty or has no data rows'] };
 	}
@@ -80,7 +102,7 @@ export async function importExercisesFromCSV(csvContent: string): Promise<{
 	for (let i = 0; i < dataLines.length; i++) {
 		const lineNum = i + 2; // +2 because we skip header and lines are 1-indexed
 		try {
-			const values = parseCsvLine(dataLines[i]);
+			const values = dataLines[i];
 
 			if (values.length < 2) {
 				errors.push(`Line ${lineNum}: Missing required fields (name, description)`);
@@ -121,7 +143,18 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 	success: number;
 	errors: string[];
 }> {
-	const lines = csvContent.trim().split('\n');
+	const parseResult = Papa.parse<string[]>(csvContent, {
+		skipEmptyLines: true
+	});
+
+	if (parseResult.errors.length > 0) {
+		return {
+			success: 0,
+			errors: parseResult.errors.map((err) => `Parse error at row ${err.row}: ${err.message}`)
+		};
+	}
+
+	const lines = parseResult.data;
 	if (lines.length < 2) {
 		return { success: 0, errors: ['CSV file is empty or has no data rows'] };
 	}
@@ -140,7 +173,13 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 		name: string;
 		exercises: Map<
 			string,
-			Array<{ weight: number; reps: number; setNumber: number; notes?: string }>
+			Array<{
+				weight: number;
+				reps: number;
+				setNumber: number;
+				instructions?: string;
+				notes?: string;
+			}>
 		>;
 	}
 
@@ -149,14 +188,15 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 	for (let i = 0; i < dataLines.length; i++) {
 		const lineNum = i + 2;
 		try {
-			const values = parseCsvLine(dataLines[i]);
+			const values = dataLines[i];
 
 			if (values.length < 6) {
 				errors.push(`Line ${lineNum}: Missing required fields`);
 				continue;
 			}
 
-			const [date, workoutName, exerciseName, setNumberStr, weightStr, repsStr, notes] = values;
+			const [date, workoutName, exerciseName, setNumberStr, weightStr, repsStr, instructions, notes] =
+				values;
 
 			// Validate date format
 			if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -213,6 +253,7 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 				weight,
 				reps,
 				setNumber,
+				instructions: instructions?.trim(),
 				notes: notes?.trim()
 			});
 		} catch (error) {
@@ -235,6 +276,7 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 						exerciseId: exercise.id!,
 						exerciseName: exercise.name,
 						sets: sets.map((s) => ({ weight: s.weight, reps: s.reps, completed: false })),
+						instructions: sets[0]?.instructions,
 						notes: sets[0]?.notes
 					};
 				}
@@ -290,38 +332,3 @@ function escapeCsvValue(value: string): string {
 	return value;
 }
 
-/**
- * Parse a CSV line (handle quoted values)
- */
-function parseCsvLine(line: string): string[] {
-	const result: string[] = [];
-	let current = '';
-	let inQuotes = false;
-
-	for (let i = 0; i < line.length; i++) {
-		const char = line[i];
-		const nextChar = line[i + 1];
-
-		if (char === '"') {
-			if (inQuotes && nextChar === '"') {
-				// Escaped quote
-				current += '"';
-				i++; // Skip next quote
-			} else {
-				// Toggle quote mode
-				inQuotes = !inQuotes;
-			}
-		} else if (char === ',' && !inQuotes) {
-			// End of field
-			result.push(current);
-			current = '';
-		} else {
-			current += char;
-		}
-	}
-
-	// Add last field
-	result.push(current);
-
-	return result;
-}

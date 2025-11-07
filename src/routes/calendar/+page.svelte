@@ -271,8 +271,13 @@
 																- {exercise.sets.length} set{exercise.sets.length !== 1 ? 's' : ''}
 															</span>
 														</div>
+														{#if exercise.instructions}
+															<div class="mt-1 whitespace-pre-wrap text-xs text-amber-700 dark:text-amber-400">
+																{exercise.instructions}
+															</div>
+														{/if}
 														{#if exercise.notes}
-															<div class="mt-1 text-xs text-blue-600 italic dark:text-blue-400">
+															<div class="mt-1 whitespace-pre-wrap text-xs italic text-blue-600 dark:text-blue-400">
 																"{exercise.notes}"
 															</div>
 														{/if}
@@ -280,9 +285,11 @@
 												{/each}
 											</div>
 										{/if}
-										{#if workout.notes}
-											<p class="mt-2 text-sm text-blue-600 dark:text-blue-400">{workout.notes}</p>
-										{/if}
+									{#if workout.notes}
+										<p class="mt-2 whitespace-pre-wrap text-sm text-blue-600 dark:text-blue-400">
+											{workout.notes}
+										</p>
+									{/if}
 									</button>
 									<div class="flex gap-2">
 										<button

@@ -289,18 +289,35 @@
 								{/each}
 							</div>
 
+							<!-- Exercise Instructions -->
+							<div class="mt-3">
+								<label
+									for="exercise-instructions-{exerciseIndex}"
+									class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300"
+								>
+									Instructions (tempo, technique cues, RIR, etc.)
+								</label>
+								<textarea
+									id="exercise-instructions-{exerciseIndex}"
+									bind:value={exercise.instructions}
+									placeholder="e.g., TEMPO - 3111, 2 RIR, pause at bottom..."
+									rows="2"
+									class="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
+								></textarea>
+							</div>
+
 							<!-- Exercise Notes -->
 							<div class="mt-3">
 								<label
 									for="exercise-notes-{exerciseIndex}"
 									class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300"
 								>
-									Notes for this exercise
+									Notes (personal observations)
 								</label>
 								<textarea
 									id="exercise-notes-{exerciseIndex}"
 									bind:value={exercise.notes}
-									placeholder="Add notes about form, difficulty, adjustments, etc..."
+									placeholder="e.g., How the session felt, adjustments made..."
 									rows="2"
 									class="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
 								></textarea>

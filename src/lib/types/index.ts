@@ -23,7 +23,8 @@ export interface WorkoutExercise {
 	exerciseId: number;
 	exerciseName: string;
 	sets: Set[];
-	notes?: string;
+	instructions?: string; // Programmatic instructions (tempo, technique, etc.)
+	notes?: string; // User notes about the session
 }
 
 // Workout represents a planned or completed workout
@@ -43,7 +44,8 @@ export interface WorkoutLog {
 	exerciseId: number;
 	sets: Set[];
 	completedAt: Date;
-	notes?: string;
+	instructions?: string; // Programmatic instructions from the workout
+	notes?: string; // User notes about the session
 }
 
 // CSV import row format

@@ -337,7 +337,7 @@
 						>
 							<p class="text-sm text-gray-700 dark:text-gray-300">
 								<span class="font-semibold text-gray-900 dark:text-gray-100">Workout Notes:</span>
-								<span class="break-words">{workout.notes}</span>
+								<span class="whitespace-pre-wrap break-words">{workout.notes}</span>
 							</p>
 						</div>
 					{/if}
@@ -424,6 +424,20 @@
 								<!-- Exercise Content (Collapsible) -->
 								{#if isExpanded}
 									<div class="mt-3">
+										<!-- Instructions -->
+										{#if exercise.instructions}
+											<div class="mb-3 rounded-md bg-amber-50 p-3 dark:bg-amber-900/20">
+												<p
+													class="text-xs font-medium tracking-wide text-amber-800 uppercase dark:text-amber-400"
+												>
+													Instructions
+												</p>
+												<p class="mt-1 whitespace-pre-wrap text-sm text-amber-900 dark:text-amber-200">
+													{exercise.instructions}
+												</p>
+											</div>
+										{/if}
+
 										{#if lastPerformance}
 											<div class="mb-3 rounded-md bg-gray-100 p-3 dark:bg-gray-700">
 												<p
