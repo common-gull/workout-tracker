@@ -1,0 +1,14 @@
+---
+description: Always run linting and TypeScript checks after making changes
+alwaysApply: true
+---
+
+# Always Run Linting and Type Checks
+
+After making ANY code changes:
+
+1. Fix ALL linter errors before completion
+2. Zero tolerance for new errors
+3. Check TypeScript compilation passes
+
+Don't proceed to next task with linting errors.
