@@ -15,7 +15,6 @@
 	let daysInMonth = $derived(() => {
 		const year = currentDate.getFullYear();
 		const month = currentDate.getMonth();
-		const firstDay = new Date(year, month, 1);
 		const lastDay = new Date(year, month + 1, 0);
 		const days: Array<{ date: Date; dateString: string; dayName: string; isToday: boolean }> = [];
 
@@ -250,7 +249,7 @@
 										<h3 class="text-lg font-semibold text-blue-900">{workout.name}</h3>
 										{#if workout.exercises.length > 0}
 											<div class="mt-2 space-y-2">
-												{#each workout.exercises as exercise}
+												{#each workout.exercises as exercise (exercise.exerciseId)}
 													<div>
 														<div class="text-sm text-blue-700">
 															<span class="font-medium">{exercise.exerciseName}</span>

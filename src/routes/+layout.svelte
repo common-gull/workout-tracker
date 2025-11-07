@@ -46,15 +46,6 @@
 					>
 						Calendar
 					</a>
-					<a
-						href="/progress"
-						data-sveltekit-preload-data
-						class="text-gray-600 hover:text-gray-900"
-						class:font-semibold={$page.url.pathname === '/progress'}
-						class:text-blue-600={$page.url.pathname === '/progress'}
-					>
-						Progress
-					</a>
 				</div>
 			</div>
 		</div>

@@ -1,12 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import {
-		getWorkoutsByDate,
-		updateWorkout,
-		getWorkoutsByDateRange,
-		getWorkoutsSortedByDate
-	} from '$lib/db';
-	import type { Workout, WorkoutExercise } from '$lib/types';
+	import { getWorkoutsByDate, updateWorkout, getWorkoutsSortedByDate } from '$lib/db';
+	import type { Workout } from '$lib/types';
 	import WorkoutForm from '$lib/components/WorkoutForm.svelte';
 
 	let today = $state(new Date().toISOString().split('T')[0]);
@@ -298,7 +293,7 @@
 												})}):
 											</p>
 											<div class="flex flex-wrap gap-2">
-												{#each lastPerformance.sets as set, idx}
+												{#each lastPerformance.sets as set, idx (idx)}
 													<span
 														class="inline-flex items-center rounded bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700"
 													>
@@ -310,7 +305,7 @@
 									{/if}
 								</div>
 								<div class="space-y-2">
-									{#each exercise.sets as set, setIndex}
+									{#each exercise.sets as set, setIndex (setIndex)}
 										<div
 											class="flex items-center justify-between rounded-lg border p-3 transition-colors"
 											class:border-green-500={set.completed}
@@ -402,10 +397,14 @@
 
 								<!-- Exercise Notes -->
 								<div class="mt-3">
-									<label class="mb-1 block text-sm font-medium text-gray-700">
+									<label
+										for="exercise-notes-{workout.id}-{exerciseIndex}"
+										class="mb-1 block text-sm font-medium text-gray-700"
+									>
 										Notes for this exercise
 									</label>
 									<textarea
+										id="exercise-notes-{workout.id}-{exerciseIndex}"
 										value={exercise.notes || ''}
 										onchange={(e) =>
 											updateExerciseNotes(workout, exerciseIndex, e.currentTarget.value)}

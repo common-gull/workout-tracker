@@ -108,14 +108,16 @@
 <div
 	class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm"
 	onclick={handleBackdropClick}
+	onkeydown={(e) => e.key === 'Escape' && onCancel()}
 	role="dialog"
 	aria-modal="true"
 	aria-labelledby="form-title"
+	tabindex="-1"
 >
 	<!-- Modal Content -->
 	<div
 		class="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-lg bg-white shadow-xl"
-		onclick={(e) => e.stopPropagation()}
+		role="document"
 	>
 		<!-- Modal Header (Fixed) -->
 		<div class="flex-shrink-0 border-b border-gray-200 px-6 py-4">
@@ -153,7 +155,7 @@
 				<!-- Exercises -->
 				<div class="mb-4">
 					<div class="mb-2 flex items-center justify-between">
-						<label class="block text-sm font-medium text-gray-700">Exercises</label>
+						<span class="block text-sm font-medium text-gray-700">Exercises</span>
 						<button
 							type="button"
 							onclick={addExercise}

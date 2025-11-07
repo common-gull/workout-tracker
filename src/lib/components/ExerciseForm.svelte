@@ -64,15 +64,14 @@
 <div
 	class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm"
 	onclick={handleBackdropClick}
+	onkeydown={(e) => e.key === 'Escape' && onCancel()}
 	role="dialog"
 	aria-modal="true"
 	aria-labelledby="form-title"
+	tabindex="-1"
 >
 	<!-- Modal Content -->
-	<div
-		class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl"
-		onclick={(e) => e.stopPropagation()}
-	>
+	<div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl" role="document">
 		<h2 id="form-title" class="mb-4 text-2xl font-bold">
 			{exercise ? 'Edit Exercise' : 'Add Exercise'}
 		</h2>
