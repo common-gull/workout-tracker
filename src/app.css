@@ -4,6 +4,15 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+/* Prevent white flash on page load */
+html {
+	background-color: #fff;
+}
+
+html.dark {
+	background-color: #111827; /* gray-900 */
+}
+
 /* Dark mode base styles */
 .dark {
 	color-scheme: dark;

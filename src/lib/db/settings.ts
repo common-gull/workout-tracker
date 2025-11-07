@@ -1,5 +1,6 @@
 import { db } from './database';
 import type { Settings } from '$lib/types';
+import { storeTheme } from '$lib/utils/theme';
 
 const DEFAULT_SETTINGS: Omit<Settings, 'id' | 'createdAt' | 'updatedAt'> = {
 	unitPreference: 'imperial',
@@ -15,6 +16,8 @@ export async function getSettings(): Promise<Settings> {
 			createdAt: new Date(),
 			updatedAt: new Date()
 		});
+		// Sync to localStorage
+		storeTheme(DEFAULT_SETTINGS.theme);
 		return { id, ...DEFAULT_SETTINGS, createdAt: new Date(), updatedAt: new Date() };
 	}
 
@@ -28,6 +31,8 @@ export async function getSettings(): Promise<Settings> {
 				updatedAt: new Date()
 			});
 		}
+		// Sync to localStorage
+		storeTheme(existingSettings.theme);
 	}
 
 	return existingSettings;
@@ -42,6 +47,10 @@ export async function updateSettings(
 			...updates,
 			updatedAt: new Date()
 		});
+		// Sync theme to localStorage if it was updated
+		if (updates.theme) {
+			storeTheme(updates.theme);
+		}
 	}
 }
 

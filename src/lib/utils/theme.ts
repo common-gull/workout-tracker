@@ -4,6 +4,28 @@
 
 export type ThemePreference = 'light' | 'dark' | 'system';
 
+const THEME_STORAGE_KEY = 'workout-tracker-theme';
+
+/**
+ * Get theme preference from localStorage (synchronous)
+ */
+export function getStoredTheme(): ThemePreference | null {
+	if (typeof localStorage === 'undefined') return null;
+	const stored = localStorage.getItem(THEME_STORAGE_KEY);
+	if (stored === 'light' || stored === 'dark' || stored === 'system') {
+		return stored;
+	}
+	return null;
+}
+
+/**
+ * Store theme preference in localStorage (synchronous)
+ */
+export function storeTheme(preference: ThemePreference): void {
+	if (typeof localStorage === 'undefined') return;
+	localStorage.setItem(THEME_STORAGE_KEY, preference);
+}
+
 /**
  * Get the resolved theme (either 'light' or 'dark') based on preference
  */
@@ -33,9 +55,23 @@ export function applyTheme(theme: 'light' | 'dark'): void {
 }
 
 /**
+ * Initialize theme on page load (should be called as early as possible)
+ */
+export function initializeThemeEarly(): void {
+	const stored = getStoredTheme();
+	if (stored) {
+		const resolved = getResolvedTheme(stored);
+		applyTheme(resolved);
+	}
+}
+
+/**
  * Initialize theme based on preference
  */
 export function initializeTheme(preference: ThemePreference): void {
+	// Store in localStorage for next page load
+	storeTheme(preference);
+
 	const resolved = getResolvedTheme(preference);
 	applyTheme(resolved);
 
