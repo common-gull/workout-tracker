@@ -13,8 +13,9 @@ export interface Exercise {
 
 // Set represents a single set within an exercise
 export interface Set {
-	weight: number;
-	reps: number;
+	weight: number; // Weight in kg (internal storage)
+	reps: number; // Number of repetitions
+	duration?: number; // Duration in seconds (for cardio/timed exercises)
 	completed: boolean;
 }
 

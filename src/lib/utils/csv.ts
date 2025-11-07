@@ -5,6 +5,7 @@
 import Papa from 'papaparse';
 import { addExercise, getAllExercises } from '$lib/db/exercises';
 import { addWorkout, getAllWorkouts } from '$lib/db/workouts';
+import { lbsToKg } from './units';
 
 /**
  * Export exercises to CSV format
@@ -42,7 +43,9 @@ export async function exportWorkoutsToCSV(): Promise<string> {
 		'exerciseName',
 		'setNumber',
 		'weight',
+		'weightUnit',
 		'reps',
+		'duration',
 		'instructions',
 		'notes'
 	];
@@ -59,7 +62,9 @@ export async function exportWorkoutsToCSV(): Promise<string> {
 					escapeCsvValue(exercise.exerciseName),
 					String(i + 1),
 					String(set.weight),
+					'kg', // Always export as kg (internal storage format)
 					String(set.reps),
+					String(set.duration || ''), // Duration in seconds for cardio/timed exercises
 					escapeCsvValue(exercise.instructions || ''),
 					escapeCsvValue(exercise.notes || '')
 				];
@@ -177,6 +182,7 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 				weight: number;
 				reps: number;
 				setNumber: number;
+				duration?: number;
 				instructions?: string;
 				notes?: string;
 			}>
@@ -195,8 +201,18 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 				continue;
 			}
 
-			const [date, workoutName, exerciseName, setNumberStr, weightStr, repsStr, instructions, notes] =
-				values;
+			// Support both old format (8 columns) and new format (10 columns)
+			let date, workoutName, exerciseName, setNumberStr, weightStr, weightUnit, repsStr, durationStr, instructions, notes;
+			
+			if (values.length >= 10) {
+				// New format: date,workoutName,exerciseName,setNumber,weight,weightUnit,reps,duration,instructions,notes
+				[date, workoutName, exerciseName, setNumberStr, weightStr, weightUnit, repsStr, durationStr, instructions, notes] = values;
+			} else {
+				// Old format: date,workoutName,exerciseName,setNumber,weight,reps,instructions,notes
+				[date, workoutName, exerciseName, setNumberStr, weightStr, repsStr, instructions, notes] = values;
+				weightUnit = 'lb'; // Default to pounds for old format
+				durationStr = '';
+			}
 
 			// Validate date format
 			if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -213,12 +229,25 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 				continue;
 			}
 
-			const weight = parseFloat(weightStr);
+			const weightValue = parseFloat(weightStr);
 			const reps = parseInt(repsStr, 10);
 			const setNumber = parseInt(setNumberStr, 10);
+			const duration = durationStr ? parseInt(durationStr, 10) : undefined;
 
-			if (isNaN(weight) || weight < 0) {
+			if (isNaN(weightValue) || weightValue < 0) {
 				errors.push(`Line ${lineNum}: Invalid weight value`);
+				continue;
+			}
+
+			// Convert weight to kg based on unit
+			let weight: number;
+			const unit = (weightUnit || 'lb').toLowerCase().trim();
+			if (unit === 'lb' || unit === 'lbs') {
+				weight = lbsToKg(weightValue);
+			} else if (unit === 'kg') {
+				weight = weightValue;
+			} else {
+				errors.push(`Line ${lineNum}: Invalid weight unit "${weightUnit}" (use "lb" or "kg")`);
 				continue;
 			}
 
@@ -229,6 +258,11 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 
 			if (isNaN(setNumber) || setNumber < 1) {
 				errors.push(`Line ${lineNum}: Invalid set number`);
+				continue;
+			}
+
+			if (duration !== undefined && (isNaN(duration) || duration < 0)) {
+				errors.push(`Line ${lineNum}: Invalid duration value`);
 				continue;
 			}
 
@@ -253,6 +287,7 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 				weight,
 				reps,
 				setNumber,
+				duration,
 				instructions: instructions?.trim(),
 				notes: notes?.trim()
 			});
@@ -272,13 +307,18 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 					// Sort sets by set number
 					sets.sort((a, b) => a.setNumber - b.setNumber);
 
-					return {
-						exerciseId: exercise.id!,
-						exerciseName: exercise.name,
-						sets: sets.map((s) => ({ weight: s.weight, reps: s.reps, completed: false })),
-						instructions: sets[0]?.instructions,
-						notes: sets[0]?.notes
-					};
+				return {
+					exerciseId: exercise.id!,
+					exerciseName: exercise.name,
+					sets: sets.map((s) => ({ 
+						weight: s.weight, 
+						reps: s.reps, 
+						duration: s.duration,
+						completed: false 
+					})),
+					instructions: sets[0]?.instructions,
+					notes: sets[0]?.notes
+				};
 				}
 			);
 
