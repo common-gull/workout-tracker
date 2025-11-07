@@ -5,14 +5,17 @@
 	import ExerciseForm from '$lib/components/ExerciseForm.svelte';
 	import DeleteModal from '$lib/components/DeleteModal.svelte';
 	import VideoPlayer from '$lib/components/VideoPlayer.svelte';
+	import ExerciseDetailModal from '$lib/components/ExerciseDetailModal.svelte';
 
-	let exercises: Exercise[] = [];
-	let filteredExercises: Exercise[] = [];
-	let searchQuery = '';
-	let showForm = false;
-	let editingExercise: Exercise | null = null;
-	let deleteTarget: Exercise | null = null;
-	let loading = true;
+	let exercises = $state<Exercise[]>([]);
+	let filteredExercises = $state<Exercise[]>([]);
+	let searchQuery = $state('');
+	let showForm = $state(false);
+	let editingExercise = $state<Exercise | null>(null);
+	let deleteTarget = $state<Exercise | null>(null);
+	let loading = $state(true);
+	let expandedCards = $state<Set<number>>(new Set());
+	let selectedExercise = $state<Exercise | null>(null);
 
 	onMount(async () => {
 		await loadExercises();
@@ -64,6 +67,34 @@
 	function handleCancel() {
 		showForm = false;
 		editingExercise = null;
+	}
+
+	function toggleCard(exerciseId: number) {
+		const newExpanded = new Set(expandedCards);
+		if (newExpanded.has(exerciseId)) {
+			newExpanded.delete(exerciseId);
+		} else {
+			newExpanded.add(exerciseId);
+		}
+		expandedCards = newExpanded;
+	}
+
+	function isCardExpanded(exerciseId: number): boolean {
+		return expandedCards.has(exerciseId);
+	}
+
+	function viewDetails(exercise: Exercise) {
+		selectedExercise = exercise;
+	}
+
+	function closeDetails() {
+		selectedExercise = null;
+	}
+
+	// Helper to truncate text
+	function truncateText(text: string, maxLength: number): string {
+		if (text.length <= maxLength) return text;
+		return text.substring(0, maxLength).trim() + '...';
 	}
 </script>
 
@@ -125,16 +156,52 @@
 	{#if !loading && filteredExercises.length > 0}
 		<div class="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
 			{#each filteredExercises as exercise (exercise.id)}
+				{@const isExpanded = isCardExpanded(exercise.id!)}
+				{@const maxDescriptionLength = 120}
 				<div
-					class="rounded-lg border border-gray-200 bg-white p-3 shadow-sm hover:shadow-md sm:p-4 dark:border-gray-700 dark:bg-gray-800"
+					class="rounded-lg border border-gray-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md sm:p-4 dark:border-gray-700 dark:bg-gray-800"
 				>
 					<div class="mb-2 flex items-start justify-between gap-2">
-						<h3
-							class="min-w-0 flex-1 truncate text-base font-semibold sm:text-lg dark:text-gray-100"
+						<button
+							onclick={() => toggleCard(exercise.id!)}
+							class="min-w-0 flex-1 text-left"
 						>
-							{exercise.name}
-						</h3>
+							<h3
+								class="flex items-center gap-2 text-base font-semibold sm:text-lg dark:text-gray-100"
+							>
+								<svg
+									class="h-4 w-4 flex-shrink-0 text-gray-400 transition-transform"
+									class:rotate-90={isExpanded}
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 5l7 7-7 7"
+									/>
+								</svg>
+								<span class="truncate">{exercise.name}</span>
+							</h3>
+						</button>
 						<div class="flex flex-shrink-0 gap-2">
+							<button
+								onclick={() => viewDetails(exercise)}
+								class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+								aria-label="View details"
+								title="View full details"
+							>
+								<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+									/>
+								</svg>
+							</button>
 							<button
 								onclick={() => handleEdit(exercise)}
 								class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
@@ -165,11 +232,40 @@
 							</button>
 						</div>
 					</div>
-					<p class="mb-3 whitespace-pre-wrap break-words text-xs text-gray-600 sm:text-sm dark:text-gray-300">
-						{exercise.description}
-					</p>
-					{#if exercise.videoLink}
-						<VideoPlayer url={exercise.videoLink} />
+
+					<!-- Collapsed view: truncated description -->
+					{#if !isExpanded}
+						<p class="mb-2 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
+							{truncateText(exercise.description, maxDescriptionLength)}
+						</p>
+						{#if exercise.description.length > maxDescriptionLength || exercise.videoLink}
+							<button
+								onclick={() => toggleCard(exercise.id!)}
+								class="text-xs text-blue-600 hover:underline dark:text-blue-400"
+							>
+								Show more
+							</button>
+						{/if}
+					{/if}
+
+					<!-- Expanded view: full description and video -->
+					{#if isExpanded}
+						<p
+							class="mb-3 whitespace-pre-wrap break-words text-xs text-gray-600 sm:text-sm dark:text-gray-300"
+						>
+							{exercise.description}
+						</p>
+						{#if exercise.videoLink}
+							<div class="mb-2">
+								<VideoPlayer url={exercise.videoLink} />
+							</div>
+						{/if}
+						<button
+							onclick={() => toggleCard(exercise.id!)}
+							class="text-xs text-blue-600 hover:underline dark:text-blue-400"
+						>
+							Show less
+						</button>
 					{/if}
 				</div>
 			{/each}
@@ -190,4 +286,9 @@
 		onConfirm={confirmDelete}
 		onCancel={() => (deleteTarget = null)}
 	/>
+{/if}
+
+<!-- Exercise Detail Modal -->
+{#if selectedExercise}
+	<ExerciseDetailModal exercise={selectedExercise} onClose={closeDetails} />
 {/if}

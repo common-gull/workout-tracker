@@ -10,7 +10,8 @@
 		const patterns = [
 			/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/, // Standard and shortened URLs
 			/youtube\.com\/embed\/([^&\s]+)/, // Embed URLs
-			/youtube\.com\/v\/([^&\s]+)/ // Old embed format
+			/youtube\.com\/v\/([^&\s]+)/, // Old embed format
+			/youtube\.com\/shorts\/([^&\s?]+)/ // YouTube Shorts
 		];
 
 		for (const pattern of patterns) {
