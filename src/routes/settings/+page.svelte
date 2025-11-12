@@ -157,14 +157,35 @@
 		try {
 			const blob = await createEncryptedBackup(backupPassword);
 			const timestamp = getTodayLocalDate();
-			const url = URL.createObjectURL(blob);
-			const link = document.createElement('a');
-			link.href = url;
-			link.download = `workout-backup-${timestamp}.backup`;
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-			URL.revokeObjectURL(url);
+			const filename = `workout-backup-${timestamp}.backup`;
+			
+			// Mobile-friendly download
+			// @ts-expect-error - showSaveFilePicker is not in TypeScript types yet
+			if (window.showSaveFilePicker) {
+				try {
+					// @ts-expect-error - showSaveFilePicker is not in TypeScript types yet
+					const handle = await window.showSaveFilePicker({
+						suggestedName: filename,
+						types: [{
+							description: 'Backup File',
+							accept: { 'application/octet-stream': ['.backup'] }
+						}]
+					});
+					const writable = await handle.createWritable();
+					await writable.write(blob);
+					await writable.close();
+				} catch (err) {
+					// User cancelled or API not available, use fallback
+					if (err instanceof Error && err.name !== 'AbortError') {
+						throw err;
+					}
+					// If cancelled, use fallback
+					downloadBackupFallback(blob, filename);
+				}
+			} else {
+				// Fallback for mobile and older browsers
+				downloadBackupFallback(blob, filename);
+			}
 
 			showBackupPasswordModal = false;
 			showStatus('success', 'Encrypted backup created successfully');
@@ -177,6 +198,23 @@
 			processingBackup = false;
 			backupPassword = '';
 		}
+	}
+
+	function downloadBackupFallback(blob: Blob, filename: string) {
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = filename;
+		link.style.display = 'none';
+		document.body.appendChild(link);
+		
+		setTimeout(() => {
+			link.click();
+			setTimeout(() => {
+				document.body.removeChild(link);
+				URL.revokeObjectURL(url);
+			}, 100);
+		}, 0);
 	}
 
 	function handleRestoreBackup(event: Event) {

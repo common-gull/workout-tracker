@@ -361,7 +361,7 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 }
 
 /**
- * Download a string as a file
+ * Download a string as a file (mobile-friendly)
  */
 export function downloadFile(
 	content: string,
@@ -369,14 +369,53 @@ export function downloadFile(
 	contentType: string = 'text/csv'
 ): void {
 	const blob = new Blob([content], { type: contentType });
+	
+	// Check if the browser supports the File System Access API (better UX on desktop)
+	// @ts-expect-error - showSaveFilePicker is not in TypeScript types yet
+	if (window.showSaveFilePicker) {
+		// Modern browsers with File System Access API
+		// @ts-expect-error - showSaveFilePicker is not in TypeScript types yet
+		window.showSaveFilePicker({
+			suggestedName: filename,
+			types: [{
+				description: 'CSV File',
+				accept: { [contentType]: [`.${filename.split('.').pop()}`] }
+			}]
+		}).then((handle: any) => {
+			return handle.createWritable();
+		}).then((writable: any) => {
+			writable.write(blob);
+			return writable.close();
+		}).catch(() => {
+			// Fallback if user cancels or API fails
+			fallbackDownload(blob, filename);
+		});
+	} else {
+		// Fallback for older browsers and mobile
+		fallbackDownload(blob, filename);
+	}
+}
+
+function fallbackDownload(blob: Blob, filename: string): void {
 	const url = URL.createObjectURL(blob);
 	const link = document.createElement('a');
 	link.href = url;
 	link.download = filename;
+	link.style.display = 'none';
+	
+	// Add to DOM, click, and remove
 	document.body.appendChild(link);
-	link.click();
-	document.body.removeChild(link);
-	URL.revokeObjectURL(url);
+	
+	// Use setTimeout to ensure the link is in the DOM
+	setTimeout(() => {
+		link.click();
+		
+		// Clean up after a delay
+		setTimeout(() => {
+			document.body.removeChild(link);
+			URL.revokeObjectURL(url);
+		}, 100);
+	}, 0);
 }
 
 /**
