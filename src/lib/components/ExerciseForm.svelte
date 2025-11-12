@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { addExercise, updateExercise } from '$lib/db';
 	import type { Exercise } from '$lib/types';
+	import Modal from './Modal.svelte';
 
 	interface Props {
 		exercise?: Exercise | null;
@@ -52,31 +53,12 @@
 			saving = false;
 		}
 	}
-
-	function handleBackdropClick(event: MouseEvent) {
-		if (event.target === event.currentTarget) {
-			onCancel();
-		}
-	}
 </script>
 
-<!-- Modal Backdrop -->
-<div
-	class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-0 backdrop-blur-sm sm:p-4"
-	onclick={handleBackdropClick}
-	onkeydown={(e) => e.key === 'Escape' && onCancel()}
-	role="dialog"
-	aria-modal="true"
-	aria-labelledby="form-title"
-	tabindex="-1"
->
-	<!-- Modal Content -->
-	<div
-		class="flex h-full w-full max-w-md flex-col bg-white shadow-xl sm:h-auto sm:rounded-lg sm:p-6 dark:bg-gray-800"
-		role="document"
-	>
-		<div class="flex-1 overflow-y-auto p-4 sm:p-0">
-			<h2 id="form-title" class="mb-4 text-xl font-bold sm:text-2xl dark:text-gray-100">
+<Modal {onCancel} size="sm" ariaLabelledby="exercise-form-title">
+	<div class="flex h-full flex-col sm:h-auto">
+		<div class="flex-1 overflow-y-auto p-4 sm:p-6">
+			<h2 id="exercise-form-title" class="mb-4 text-xl font-bold sm:text-2xl dark:text-gray-100">
 				{exercise ? 'Edit Exercise' : 'Add Exercise'}
 			</h2>
 
@@ -165,4 +147,4 @@
 			</form>
 		</div>
 	</div>
-</div>
+</Modal>

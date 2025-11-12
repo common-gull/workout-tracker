@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Workout } from '$lib/types';
 	import { getTomorrowDate } from '$lib/services/workoutOperations';
+	import Modal from './Modal.svelte';
 
 	interface Props {
 		workout: Workout;
@@ -17,31 +18,19 @@
 			onConfirm(cloneDate);
 		}
 	}
-
-	function handleBackdropClick(event: MouseEvent) {
-		if (event.target === event.currentTarget) {
-			onCancel();
-		}
-	}
-
-	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape') {
-			onCancel();
-		}
-	}
 </script>
 
-<div
-	class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm"
-	onclick={handleBackdropClick}
-	onkeydown={handleKeydown}
-	role="dialog"
-	aria-modal="true"
-	tabindex="-1"
+<Modal
+	{onCancel}
+	size="sm"
+	ariaLabelledby="clone-modal-title"
+	ariaDescribedby="clone-modal-description"
 >
-	<div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
-		<h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">Clone Workout</h2>
-		<p class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+	<div class="p-6">
+		<h2 id="clone-modal-title" class="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">
+			Clone Workout
+		</h2>
+		<p id="clone-modal-description" class="mb-4 text-sm text-gray-600 dark:text-gray-400">
 			Clone "{workout.name}" to a new date. All exercises, sets, weights, and reps will be copied,
 			but completion status will be reset.
 		</p>
@@ -79,4 +68,4 @@
 			</button>
 		</div>
 	</div>
-</div>
+</Modal>

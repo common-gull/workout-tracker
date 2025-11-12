@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Modal from './Modal.svelte';
+
 	interface Props {
 		title: string;
 		message: string;
@@ -7,50 +9,40 @@
 	}
 
 	let { title, message, onConfirm, onCancel }: Props = $props();
-
-	function handleBackdropClick(event: MouseEvent) {
-		if (event.target === event.currentTarget) {
-			onCancel();
-		}
-	}
 </script>
 
-<!-- Modal Backdrop -->
-<div
-	class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm sm:p-4"
-	onclick={handleBackdropClick}
-	onkeydown={(e) => e.key === 'Escape' && onCancel()}
-	role="dialog"
-	aria-modal="true"
-	aria-labelledby="modal-title"
-	tabindex="-1"
+<Modal
+	{onCancel}
+	size="sm"
+	ariaLabelledby="delete-modal-title"
+	ariaDescribedby="delete-modal-description"
 >
-	<!-- Modal Content -->
-	<div
-		class="w-full max-w-md rounded-lg bg-white p-5 shadow-xl sm:p-6 dark:bg-gray-800"
-		role="document"
-	>
-		<!-- Icon -->
-		<div class="mb-4 flex items-center justify-center">
-			<div class="rounded-full bg-red-100 p-3 dark:bg-red-900/30">
-				<svg
-					class="h-6 w-6 text-red-600 dark:text-red-400"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-					/>
-				</svg>
-			</div>
+	<!-- Icon -->
+	<div class="mb-4 flex items-center justify-center pt-6">
+		<div class="rounded-full bg-red-100 p-3 dark:bg-red-900/30">
+			<svg
+				class="h-6 w-6 text-red-600 dark:text-red-400"
+				fill="none"
+				stroke="currentColor"
+				viewBox="0 0 24 24"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+				/>
+			</svg>
 		</div>
+	</div>
 
-		<h2 id="modal-title" class="mb-2 text-center text-xl font-bold dark:text-gray-100">{title}</h2>
-		<p class="mb-6 text-center text-gray-600 dark:text-gray-300">{message}</p>
+	<div class="px-6 pb-6">
+		<h2 id="delete-modal-title" class="mb-2 text-center text-xl font-bold dark:text-gray-100">
+			{title}
+		</h2>
+		<p id="delete-modal-description" class="mb-6 text-center text-gray-600 dark:text-gray-300">
+			{message}
+		</p>
 
 		<!-- Actions -->
 		<div class="flex gap-3">
@@ -68,4 +60,4 @@
 			</button>
 		</div>
 	</div>
-</div>
+</Modal>

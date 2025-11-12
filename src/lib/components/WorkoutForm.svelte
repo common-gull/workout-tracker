@@ -3,6 +3,7 @@
 	import { addWorkout, updateWorkout, getAllExercises, getSettings } from '$lib/db';
 	import type { Workout, Exercise, WorkoutExercise, Settings } from '$lib/types';
 	import { convertWeightToDisplay, convertWeightToStorage, getUnitLabel } from '$lib/utils/units';
+	import Modal from './Modal.svelte';
 
 	interface Props {
 		workout?: Workout | null;
@@ -119,34 +120,15 @@
 			saving = false;
 		}
 	}
-
-	function handleBackdropClick(event: MouseEvent) {
-		if (event.target === event.currentTarget) {
-			onCancel();
-		}
-	}
 </script>
 
-<!-- Modal Backdrop -->
-<div
-	class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-0 backdrop-blur-sm sm:p-4"
-	onclick={handleBackdropClick}
-	onkeydown={(e) => e.key === 'Escape' && onCancel()}
-	role="dialog"
-	aria-modal="true"
-	aria-labelledby="form-title"
-	tabindex="-1"
->
-	<!-- Modal Content -->
-	<div
-		class="flex h-full w-full max-w-2xl flex-col bg-white shadow-xl sm:h-auto sm:max-h-[90vh] sm:rounded-lg dark:bg-gray-800"
-		role="document"
-	>
+<Modal {onCancel} size="lg" ariaLabelledby="workout-form-title">
+	<div class="flex h-full flex-col sm:max-h-[90vh]">
 		<!-- Modal Header (Fixed) -->
 		<div
 			class="flex-shrink-0 border-b border-gray-200 px-4 py-3 sm:px-6 sm:py-4 dark:border-gray-700"
 		>
-			<h2 id="form-title" class="text-xl font-bold sm:text-2xl dark:text-gray-100">
+			<h2 id="workout-form-title" class="text-xl font-bold sm:text-2xl dark:text-gray-100">
 				{workout ? 'Edit Workout' : 'Add Workout'} - {date}
 			</h2>
 		</div>
@@ -369,4 +351,4 @@
 			</div>
 		</div>
 	</div>
-</div>
+</Modal>

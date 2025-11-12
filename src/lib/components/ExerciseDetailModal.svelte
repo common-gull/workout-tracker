@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Exercise } from '$lib/types';
 	import VideoPlayer from './VideoPlayer.svelte';
+	import Modal from './Modal.svelte';
 
 	interface Props {
 		exercise: Exercise;
@@ -8,29 +9,15 @@
 	}
 
 	let { exercise, onClose }: Props = $props();
-
-	function handleBackdropClick(event: MouseEvent) {
-		if (event.target === event.currentTarget) {
-			onClose();
-		}
-	}
 </script>
 
-<!-- Modal Backdrop -->
-<div
-	class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-0 backdrop-blur-sm sm:p-4"
-	onclick={handleBackdropClick}
-	onkeydown={(e) => e.key === 'Escape' && onClose()}
-	role="dialog"
-	aria-modal="true"
-	aria-labelledby="exercise-detail-title"
-	tabindex="-1"
+<Modal
+	onCancel={onClose}
+	size="lg"
+	ariaLabelledby="exercise-detail-title"
+	ariaDescribedby="exercise-detail-description"
 >
-	<!-- Modal Content -->
-	<div
-		class="flex h-full w-full max-w-3xl flex-col bg-white shadow-xl sm:h-auto sm:max-h-[90vh] sm:rounded-lg dark:bg-gray-800"
-		role="document"
-	>
+	<div class="flex h-full flex-col sm:max-h-[90vh]">
 		<!-- Modal Header (Fixed) -->
 		<div
 			class="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-4 py-3 sm:px-6 sm:py-4 dark:border-gray-700"
@@ -66,7 +53,10 @@
 				>
 					Description
 				</h3>
-				<p class="text-base break-words whitespace-pre-wrap text-gray-700 dark:text-gray-300">
+				<p
+					id="exercise-detail-description"
+					class="text-base break-words whitespace-pre-wrap text-gray-700 dark:text-gray-300"
+				>
 					{exercise.description}
 				</p>
 			</div>
@@ -96,4 +86,4 @@
 			</button>
 		</div>
 	</div>
-</div>
+</Modal>
