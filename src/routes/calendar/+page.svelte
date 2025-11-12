@@ -3,6 +3,9 @@
 	import type { Workout } from '$lib/types';
 	import WorkoutForm from '$lib/components/WorkoutForm.svelte';
 	import DeleteModal from '$lib/components/DeleteModal.svelte';
+	import MoveWorkoutModal from '$lib/components/MoveWorkoutModal.svelte';
+	import CloneWorkoutModal from '$lib/components/CloneWorkoutModal.svelte';
+	import { moveWorkout, cloneWorkout } from '$lib/services/workoutOperations';
 
 	let currentDate = $state(new Date());
 	let workoutsByDate = $state<Record<string, Workout[]>>({});
@@ -10,6 +13,9 @@
 	let showWorkoutForm = $state(false);
 	let editingWorkout = $state<Workout | null>(null);
 	let deleteTarget = $state<Workout | null>(null);
+	let cloneTarget = $state<Workout | null>(null);
+	let moveTarget = $state<Workout | null>(null);
+	let openMenuId = $state<number | null>(null);
 
 	// Generate array of days for current month
 	let daysInMonth = $derived(() => {
@@ -100,25 +106,63 @@
 	async function confirmDelete() {
 		if (deleteTarget?.id) {
 			await deleteWorkout(deleteTarget.id);
-			const days = daysInMonth();
-			if (days.length > 0) {
-				const firstDay = days[0].dateString;
-				const lastDay = days[days.length - 1].dateString;
-				await loadWorkouts(firstDay, lastDay);
-			}
+			await reloadWorkouts();
 			deleteTarget = null;
 		}
 	}
 
-	async function handleWorkoutSaved() {
-		showWorkoutForm = false;
-		editingWorkout = null;
+	function handleCloneWorkout(workout: Workout) {
+		openMenuId = null;
+		cloneTarget = workout;
+	}
+
+	function handleMoveWorkout(workout: Workout) {
+		openMenuId = null;
+		moveTarget = workout;
+	}
+
+	async function confirmClone(targetDate: string) {
+		if (!cloneTarget) return;
+
+		try {
+			await cloneWorkout(cloneTarget, targetDate);
+			await reloadWorkouts();
+			cloneTarget = null;
+		} catch (error) {
+			console.error('Failed to clone workout:', error);
+		}
+	}
+
+	async function confirmMove(newDate: string) {
+		if (!moveTarget?.id) return;
+
+		try {
+			await moveWorkout(moveTarget.id, newDate);
+			await reloadWorkouts();
+			moveTarget = null;
+		} catch (error) {
+			console.error('Failed to move workout:', error);
+		}
+	}
+
+	async function reloadWorkouts() {
 		const days = daysInMonth();
 		if (days.length > 0) {
 			const firstDay = days[0].dateString;
 			const lastDay = days[days.length - 1].dateString;
 			await loadWorkouts(firstDay, lastDay);
 		}
+	}
+
+	function toggleMenu(workoutId: number | undefined) {
+		if (!workoutId) return;
+		openMenuId = openMenuId === workoutId ? null : workoutId;
+	}
+
+	async function handleWorkoutSaved() {
+		showWorkoutForm = false;
+		editingWorkout = null;
+		await reloadWorkouts();
 	}
 
 	function handleCancel() {
@@ -295,35 +339,104 @@
 											</p>
 										{/if}
 									</button>
-									<div class="flex gap-2">
+									<div class="relative">
 										<button
-											onclick={() => handleEditWorkout(workout)}
-											class="rounded-lg p-2 text-blue-600 hover:bg-blue-200 dark:text-blue-400 dark:hover:bg-blue-800/50"
-											aria-label="Edit workout"
+											onclick={() => toggleMenu(workout.id)}
+											class="rounded-lg p-2 text-gray-600 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700"
+											aria-label="Workout actions"
 										>
 											<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 												<path
 													stroke-linecap="round"
 													stroke-linejoin="round"
 													stroke-width="2"
-													d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+													d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
 												/>
 											</svg>
 										</button>
-										<button
-											onclick={() => handleDeleteWorkout(workout)}
-											class="rounded-lg p-2 text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900/30"
-											aria-label="Delete workout"
-										>
-											<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-												/>
-											</svg>
-										</button>
+
+										{#if openMenuId === workout.id}
+											<div
+												class="absolute top-full right-0 z-10 mt-1 w-48 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+											>
+												<button
+													onclick={() => handleEditWorkout(workout)}
+													class="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+												>
+													<svg
+														class="h-4 w-4"
+														fill="none"
+														stroke="currentColor"
+														viewBox="0 0 24 24"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+														/>
+													</svg>
+													Edit
+												</button>
+												<button
+													onclick={() => handleMoveWorkout(workout)}
+													class="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+												>
+													<svg
+														class="h-4 w-4"
+														fill="none"
+														stroke="currentColor"
+														viewBox="0 0 24 24"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+														/>
+													</svg>
+													Move
+												</button>
+												<button
+													onclick={() => handleCloneWorkout(workout)}
+													class="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+												>
+													<svg
+														class="h-4 w-4"
+														fill="none"
+														stroke="currentColor"
+														viewBox="0 0 24 24"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+														/>
+													</svg>
+													Clone
+												</button>
+												<button
+													onclick={() => handleDeleteWorkout(workout)}
+													class="flex w-full items-center gap-3 rounded-b-lg px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30"
+												>
+													<svg
+														class="h-4 w-4"
+														fill="none"
+														stroke="currentColor"
+														viewBox="0 0 24 24"
+													>
+														<path
+															stroke-linecap="round"
+															stroke-linejoin="round"
+															stroke-width="2"
+															d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+														/>
+													</svg>
+													Delete
+												</button>
+											</div>
+										{/if}
 									</div>
 								</div>
 							</div>
@@ -351,5 +464,21 @@
 		message="Are you sure you want to delete '{deleteTarget.name}'? This action cannot be undone."
 		onConfirm={confirmDelete}
 		onCancel={() => (deleteTarget = null)}
+	/>
+{/if}
+
+{#if moveTarget}
+	<MoveWorkoutModal
+		workout={moveTarget}
+		onConfirm={confirmMove}
+		onCancel={() => (moveTarget = null)}
+	/>
+{/if}
+
+{#if cloneTarget}
+	<CloneWorkoutModal
+		workout={cloneTarget}
+		onConfirm={confirmClone}
+		onCancel={() => (cloneTarget = null)}
 	/>
 {/if}
