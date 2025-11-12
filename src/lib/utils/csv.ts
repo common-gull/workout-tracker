@@ -363,37 +363,78 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 /**
  * Download a string as a file (mobile-friendly)
  */
-export function downloadFile(
+export async function downloadFile(
 	content: string,
 	filename: string,
 	contentType: string = 'text/csv'
-): void {
+): Promise<void> {
 	const blob = new Blob([content], { type: contentType });
+	await downloadBlob(blob, filename, contentType);
+}
+
+/**
+ * Download a Blob as a file (mobile-friendly)
+ * Tries multiple methods in order of preference:
+ * 1. Web Share API (best for mobile)
+ * 2. File System Access API (best for desktop)
+ * 3. Traditional <a> download (fallback)
+ */
+export async function downloadBlob(
+	blob: Blob,
+	filename: string,
+	contentType: string = 'application/octet-stream',
+	shareTitle?: string
+): Promise<void> {
+	// Try Web Share API first (best for mobile)
+	if (navigator.share && navigator.canShare) {
+		const file = new File([blob], filename, { type: contentType });
+		if (navigator.canShare({ files: [file] })) {
+			try {
+				await navigator.share({
+					files: [file],
+					title: shareTitle || filename
+				});
+				return;
+			} catch (err) {
+				// User cancelled or share failed, continue to other methods
+				if (err instanceof Error && err.name === 'AbortError') {
+					// User cancelled, don't fallback
+					return;
+				}
+			}
+		}
+	}
 	
-	// Check if the browser supports the File System Access API (better UX on desktop)
+	// Try File System Access API (desktop)
 	// @ts-expect-error - showSaveFilePicker is not in TypeScript types yet
 	if (window.showSaveFilePicker) {
-		// Modern browsers with File System Access API
-		// @ts-expect-error - showSaveFilePicker is not in TypeScript types yet
-		window.showSaveFilePicker({
-			suggestedName: filename,
-			types: [{
-				description: 'CSV File',
-				accept: { [contentType]: [`.${filename.split('.').pop()}`] }
-			}]
-		}).then((handle: any) => {
-			return handle.createWritable();
-		}).then((writable: any) => {
-			writable.write(blob);
-			return writable.close();
-		}).catch(() => {
-			// Fallback if user cancels or API fails
-			fallbackDownload(blob, filename);
-		});
-	} else {
-		// Fallback for older browsers and mobile
-		fallbackDownload(blob, filename);
+		try {
+			const extension = `.${filename.split('.').pop()}`;
+			const description = getFileTypeDescription(extension);
+			
+			// @ts-expect-error - showSaveFilePicker is not in TypeScript types yet
+			const handle = await window.showSaveFilePicker({
+				suggestedName: filename,
+				types: [{
+					description,
+					accept: { [contentType]: [extension] }
+				}]
+			});
+			const writable = await handle.createWritable();
+			await writable.write(blob);
+			await writable.close();
+			return;
+		} catch (err) {
+			// User cancelled or API failed
+			if (err instanceof Error && err.name === 'AbortError') {
+				return; // User cancelled
+			}
+			// Fall through to traditional download
+		}
 	}
+	
+	// Fallback: traditional download (works but UX isn't ideal on mobile)
+	fallbackDownload(blob, filename);
 }
 
 function fallbackDownload(blob: Blob, filename: string): void {
@@ -416,6 +457,16 @@ function fallbackDownload(blob: Blob, filename: string): void {
 			URL.revokeObjectURL(url);
 		}, 100);
 	}, 0);
+}
+
+function getFileTypeDescription(extension: string): string {
+	const descriptions: Record<string, string> = {
+		'.csv': 'CSV File',
+		'.backup': 'Backup File',
+		'.json': 'JSON File',
+		'.txt': 'Text File'
+	};
+	return descriptions[extension] || 'File';
 }
 
 /**

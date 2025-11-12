@@ -7,7 +7,8 @@
 		exportWorkoutsToCSV,
 		importExercisesFromCSV,
 		importWorkoutsFromCSV,
-		downloadFile
+		downloadFile,
+		downloadBlob
 	} from '$lib/utils/csv';
 	import {
 		createEncryptedBackup,
@@ -58,7 +59,7 @@
 		try {
 			const csv = await exportExercisesToCSV();
 			const timestamp = getTodayLocalDate();
-			downloadFile(csv, `exercises-${timestamp}.csv`);
+			await downloadFile(csv, `exercises-${timestamp}.csv`);
 			showStatus('success', 'Exercises exported successfully');
 		} catch (error) {
 			showStatus(
@@ -72,7 +73,7 @@
 		try {
 			const csv = await exportWorkoutsToCSV();
 			const timestamp = getTodayLocalDate();
-			downloadFile(csv, `workouts-${timestamp}.csv`);
+			await downloadFile(csv, `workouts-${timestamp}.csv`);
 			showStatus('success', 'Workouts exported successfully');
 		} catch (error) {
 			showStatus(
@@ -159,34 +160,8 @@
 			const timestamp = getTodayLocalDate();
 			const filename = `workout-backup-${timestamp}.backup`;
 			
-			// Mobile-friendly download
-			// @ts-expect-error - showSaveFilePicker is not in TypeScript types yet
-			if (window.showSaveFilePicker) {
-				try {
-					// @ts-expect-error - showSaveFilePicker is not in TypeScript types yet
-					const handle = await window.showSaveFilePicker({
-						suggestedName: filename,
-						types: [{
-							description: 'Backup File',
-							accept: { 'application/octet-stream': ['.backup'] }
-						}]
-					});
-					const writable = await handle.createWritable();
-					await writable.write(blob);
-					await writable.close();
-				} catch (err) {
-					// User cancelled or API not available, use fallback
-					if (err instanceof Error && err.name !== 'AbortError') {
-						throw err;
-					}
-					// If cancelled, use fallback
-					downloadBackupFallback(blob, filename);
-				}
-			} else {
-				// Fallback for mobile and older browsers
-				downloadBackupFallback(blob, filename);
-			}
-
+			await downloadBlob(blob, filename, 'application/octet-stream', 'Workout Backup');
+			
 			showBackupPasswordModal = false;
 			showStatus('success', 'Encrypted backup created successfully');
 		} catch (error) {
@@ -198,23 +173,6 @@
 			processingBackup = false;
 			backupPassword = '';
 		}
-	}
-
-	function downloadBackupFallback(blob: Blob, filename: string) {
-		const url = URL.createObjectURL(blob);
-		const link = document.createElement('a');
-		link.href = url;
-		link.download = filename;
-		link.style.display = 'none';
-		document.body.appendChild(link);
-		
-		setTimeout(() => {
-			link.click();
-			setTimeout(() => {
-				document.body.removeChild(link);
-				URL.revokeObjectURL(url);
-			}, 100);
-		}, 0);
 	}
 
 	function handleRestoreBackup(event: Event) {
