@@ -386,28 +386,40 @@ export async function downloadBlob(
 	shareTitle?: string
 ): Promise<void> {
 	// Try Web Share API first (best for mobile)
-	if (navigator.share && navigator.canShare) {
-		const file = new File([blob], filename, { type: contentType });
-		if (navigator.canShare({ files: [file] })) {
-			try {
-				await navigator.share({
-					files: [file],
-					title: shareTitle || filename
-				});
-				return;
-			} catch (err) {
-				// User cancelled or share failed, continue to other methods
-				if (err instanceof Error && err.name === 'AbortError') {
-					// User cancelled, don't fallback
+	// Check if navigator.share exists and if we can share files
+	if (typeof navigator !== 'undefined' && navigator.share) {
+		try {
+			const file = new File([blob], filename, { type: contentType });
+			
+			// Some browsers have navigator.share but can't share files
+			// Try to check if file sharing is supported
+			const canShareFiles = navigator.canShare && navigator.canShare({ files: [file] });
+			
+			if (canShareFiles) {
+				try {
+					await navigator.share({
+						files: [file],
+						title: shareTitle || filename
+					});
 					return;
+				} catch (shareErr) {
+					// User cancelled, return without fallback
+					if (shareErr instanceof Error && shareErr.name === 'AbortError') {
+						return;
+					}
+					// Share failed for other reason, continue to fallback
+					console.log('Share API failed:', shareErr);
 				}
 			}
+		} catch (err) {
+			// canShare or File creation failed, continue to other methods
+			console.log('Share API not available:', err);
 		}
 	}
 	
 	// Try File System Access API (desktop)
 	// @ts-expect-error - showSaveFilePicker is not in TypeScript types yet
-	if (window.showSaveFilePicker) {
+	if (typeof window !== 'undefined' && window.showSaveFilePicker) {
 		try {
 			const extension = `.${filename.split('.').pop()}`;
 			const description = getFileTypeDescription(extension);
@@ -430,10 +442,12 @@ export async function downloadBlob(
 				return; // User cancelled
 			}
 			// Fall through to traditional download
+			console.log('File System Access API failed:', err);
 		}
 	}
 	
-	// Fallback: traditional download (works but UX isn't ideal on mobile)
+	// Fallback: traditional download
+	// This should work on most browsers including mobile
 	fallbackDownload(blob, filename);
 }
 
