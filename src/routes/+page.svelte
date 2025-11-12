@@ -1,12 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import {
-		getWorkoutsByDate,
-		updateWorkout,
-		getWorkoutsSortedByDate,
-		getAllExercises,
-		getSettings
-	} from '$lib/db';
+	import { liveQuery } from 'dexie';
+	import { updateWorkout, getAllExercises, getSettings } from '$lib/db';
+	import { db } from '$lib/db/database';
 	import type { Workout, Exercise, Settings } from '$lib/types';
 	import WorkoutForm from '$lib/components/WorkoutForm.svelte';
 	import ExerciseDetailModal from '$lib/components/ExerciseDetailModal.svelte';
@@ -14,50 +10,32 @@
 	import { getTodayLocalDate } from '$lib/utils/date';
 
 	let today = $state(getTodayLocalDate());
-	let workouts = $state<Workout[]>([]);
-	let previousWorkouts = $state<Workout[]>([]);
-	let loading = $state(true);
 	let showWorkoutForm = $state(false);
 	let editingWorkout = $state<Workout | null>(null);
-	// Track expanded exercises: workoutId -> array of exerciseIndexes
 	let expandedExercises = $state<Record<number, number[]>>({});
 	let selectedExerciseDetail = $state<Exercise | null>(null);
 	let allExercises = $state<Exercise[]>([]);
 	let settings = $state<Settings | null>(null);
+		
+	const workoutsQuery = liveQuery(() => db.workouts.where('date').equals(today).toArray());
+	const previousWorkoutsQuery = liveQuery(async () => {
+		const allWorkouts = await db.workouts.orderBy('date').reverse().toArray();
+		return allWorkouts.filter((w) => w.date < today);
+	});
+
+	let workouts = $derived($workoutsQuery ?? []);
+	let previousWorkouts = $derived($previousWorkoutsQuery ?? []);
+	let loading = $derived($workoutsQuery === undefined);
 
 	onMount(async () => {
 		settings = await getSettings();
-		await loadWorkouts();
-		await loadPreviousWorkouts();
 		allExercises = await getAllExercises();
 	});
-
-	async function loadWorkouts() {
-		loading = true;
-		try {
-			workouts = await getWorkoutsByDate(today);
-		} catch (error) {
-			console.error('Failed to load workouts:', error);
-		} finally {
-			loading = false;
-		}
-	}
-
-	async function loadPreviousWorkouts() {
-		try {
-			// Get all workouts before today, sorted by date descending
-			const allWorkouts = await getWorkoutsSortedByDate(false);
-			previousWorkouts = allWorkouts.filter((w) => w.date < today);
-		} catch (error) {
-			console.error('Failed to load previous workouts:', error);
-		}
-	}
 
 	function getLastExercisePerformance(exerciseId: number): {
 		sets: Array<{ weight: number; reps: number }>;
 		date: string;
 	} | null {
-		// Search through previous workouts for this exercise
 		for (const workout of previousWorkouts) {
 			const exercise = workout.exercises.find((e) => e.exerciseId === exerciseId);
 			if (exercise && exercise.sets.length > 0) {
@@ -92,7 +70,6 @@
 			await updateWorkout(workout.id, {
 				exercises: updatedWorkout.exercises
 			});
-			await loadWorkouts();
 		} catch (error) {
 			console.error('Failed to update set:', error);
 		}
@@ -107,10 +84,8 @@
 	) {
 		if (!workout.id || !settings) return;
 
-		// Clone workout to avoid mutating state
 		const updatedWorkout = JSON.parse(JSON.stringify(workout));
 
-		// Convert weight to storage format (kg) if needed
 		if (field === 'weight') {
 			updatedWorkout.exercises[exerciseIndex].sets[setIndex][field] = convertWeightToStorage(
 				value,
@@ -124,7 +99,6 @@
 			await updateWorkout(workout.id, {
 				exercises: updatedWorkout.exercises
 			});
-			await loadWorkouts();
 		} catch (error) {
 			console.error('Failed to update set:', error);
 		}
@@ -141,7 +115,6 @@
 			await updateWorkout(workout.id, {
 				exercises: updatedWorkout.exercises
 			});
-			await loadWorkouts();
 		} catch (error) {
 			console.error('Failed to update exercise notes:', error);
 		}
@@ -197,8 +170,6 @@
 	async function handleWorkoutSaved() {
 		showWorkoutForm = false;
 		editingWorkout = null;
-		await loadWorkouts();
-		await loadPreviousWorkouts();
 	}
 
 	function handleCancel() {
