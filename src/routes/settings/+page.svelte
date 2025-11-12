@@ -15,6 +15,7 @@
 		deleteAllData
 	} from '$lib/utils/backup';
 	import { initializeTheme } from '$lib/utils/theme';
+	import { getTodayLocalDate } from '$lib/utils/date';
 
 	let settings = $state<Settings | null>(null);
 	let loading = $state(true);
@@ -56,7 +57,7 @@
 	async function handleExportExercises() {
 		try {
 			const csv = await exportExercisesToCSV();
-			const timestamp = new Date().toISOString().split('T')[0];
+			const timestamp = getTodayLocalDate();
 			downloadFile(csv, `exercises-${timestamp}.csv`);
 			showStatus('success', 'Exercises exported successfully');
 		} catch (error) {
@@ -70,7 +71,7 @@
 	async function handleExportWorkouts() {
 		try {
 			const csv = await exportWorkoutsToCSV();
-			const timestamp = new Date().toISOString().split('T')[0];
+			const timestamp = getTodayLocalDate();
 			downloadFile(csv, `workouts-${timestamp}.csv`);
 			showStatus('success', 'Workouts exported successfully');
 		} catch (error) {
@@ -155,7 +156,7 @@
 		processingBackup = true;
 		try {
 			const blob = await createEncryptedBackup(backupPassword);
-			const timestamp = new Date().toISOString().split('T')[0];
+			const timestamp = getTodayLocalDate();
 			const url = URL.createObjectURL(blob);
 			const link = document.createElement('a');
 			link.href = url;

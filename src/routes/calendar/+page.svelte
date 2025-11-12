@@ -6,6 +6,7 @@
 	import MoveWorkoutModal from '$lib/components/MoveWorkoutModal.svelte';
 	import CloneWorkoutModal from '$lib/components/CloneWorkoutModal.svelte';
 	import { moveWorkout, cloneWorkout } from '$lib/services/workoutOperations';
+	import { formatLocalDate, getTodayLocalDate } from '$lib/utils/date';
 
 	let currentDate = $state(new Date());
 	let workoutsByDate = $state<Record<string, Workout[]>>({});
@@ -26,13 +27,10 @@
 
 		for (let day = 1; day <= lastDay.getDate(); day++) {
 			const date = new Date(year, month, day);
-			const dateString = date.toISOString().split('T')[0];
+			const dateString = formatLocalDate(date);
 			const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-			const today = new Date();
-			const isToday =
-				date.getDate() === today.getDate() &&
-				date.getMonth() === today.getMonth() &&
-				date.getFullYear() === today.getFullYear();
+			const todayString = getTodayLocalDate();
+			const isToday = dateString === todayString;
 
 			days.push({ date, dateString, dayName, isToday });
 		}

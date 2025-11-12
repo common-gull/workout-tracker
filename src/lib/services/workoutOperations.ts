@@ -1,5 +1,6 @@
 import { addWorkout, updateWorkout } from '$lib/db';
 import type { Workout } from '$lib/types';
+import { getTomorrowLocalDate } from '$lib/utils/date';
 
 /**
  * Move a workout to a new date
@@ -33,10 +34,8 @@ export async function cloneWorkout(workout: Workout, targetDate: string): Promis
 }
 
 /**
- * Get tomorrow's date as ISO string (YYYY-MM-DD)
+ * Get tomorrow's date as ISO string (YYYY-MM-DD) using local timezone
  */
 export function getTomorrowDate(): string {
-	const today = new Date();
-	const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
-	return tomorrow.toISOString().split('T')[0];
+	return getTomorrowLocalDate();
 }

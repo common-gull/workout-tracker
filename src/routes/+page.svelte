@@ -11,8 +11,9 @@
 	import WorkoutForm from '$lib/components/WorkoutForm.svelte';
 	import ExerciseDetailModal from '$lib/components/ExerciseDetailModal.svelte';
 	import { convertWeightToDisplay, convertWeightToStorage, getUnitLabel } from '$lib/utils/units';
+	import { getTodayLocalDate } from '$lib/utils/date';
 
-	let today = $state(new Date().toISOString().split('T')[0]);
+	let today = $state(getTodayLocalDate());
 	let workouts = $state<Workout[]>([]);
 	let previousWorkouts = $state<Workout[]>([]);
 	let loading = $state(true);
