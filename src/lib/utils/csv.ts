@@ -82,6 +82,7 @@ export async function exportWorkoutsToCSV(): Promise<string> {
 export async function importExercisesFromCSV(csvContent: string): Promise<{
 	success: number;
 	errors: string[];
+	skipped: number;
 }> {
 	const parseResult = Papa.parse<string[]>(csvContent, {
 		skipEmptyLines: true
@@ -90,19 +91,25 @@ export async function importExercisesFromCSV(csvContent: string): Promise<{
 	if (parseResult.errors.length > 0) {
 		return {
 			success: 0,
-			errors: parseResult.errors.map((err) => `Parse error at row ${err.row}: ${err.message}`)
+			errors: parseResult.errors.map((err) => `Parse error at row ${err.row}: ${err.message}`),
+			skipped: 0
 		};
 	}
 
 	const lines = parseResult.data;
 	if (lines.length < 2) {
-		return { success: 0, errors: ['CSV file is empty or has no data rows'] };
+		return { success: 0, errors: ['CSV file is empty or has no data rows'], skipped: 0 };
 	}
+
+	// Get existing exercises to check for duplicates
+	const existingExercises = await getAllExercises();
+	const existingExerciseNames = new Set(existingExercises.map((e) => e.name.toLowerCase()));
 
 	// Skip header
 	const dataLines = lines.slice(1);
 	const errors: string[] = [];
 	let success = 0;
+	let skipped = 0;
 
 	for (let i = 0; i < dataLines.length; i++) {
 		const lineNum = i + 2; // +2 because we skip header and lines are 1-indexed
@@ -126,6 +133,12 @@ export async function importExercisesFromCSV(csvContent: string): Promise<{
 				continue;
 			}
 
+			// Check if exercise with same name already exists
+			if (existingExerciseNames.has(name.trim().toLowerCase())) {
+				skipped++;
+				continue;
+			}
+
 			await addExercise({
 				name: name.trim(),
 				description: description.trim(),
@@ -138,7 +151,7 @@ export async function importExercisesFromCSV(csvContent: string): Promise<{
 		}
 	}
 
-	return { success, errors };
+	return { success, errors, skipped };
 }
 
 /**
@@ -147,6 +160,7 @@ export async function importExercisesFromCSV(csvContent: string): Promise<{
 export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 	success: number;
 	errors: string[];
+	skipped: number;
 }> {
 	const parseResult = Papa.parse<string[]>(csvContent, {
 		skipEmptyLines: true
@@ -155,18 +169,25 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 	if (parseResult.errors.length > 0) {
 		return {
 			success: 0,
-			errors: parseResult.errors.map((err) => `Parse error at row ${err.row}: ${err.message}`)
+			errors: parseResult.errors.map((err) => `Parse error at row ${err.row}: ${err.message}`),
+			skipped: 0
 		};
 	}
 
 	const lines = parseResult.data;
 	if (lines.length < 2) {
-		return { success: 0, errors: ['CSV file is empty or has no data rows'] };
+		return { success: 0, errors: ['CSV file is empty or has no data rows'], skipped: 0 };
 	}
 
 	// Get all exercises to validate exercise names
 	const exercises = await getAllExercises();
 	const exerciseMap = new Map(exercises.map((e) => [e.name.toLowerCase(), e]));
+
+	// Get existing workouts to check for duplicates
+	const existingWorkouts = await getAllWorkouts();
+	const existingWorkoutKeys = new Set(
+		existingWorkouts.map((w) => `${w.date}|${w.name.toLowerCase()}`)
+	);
 
 	// Skip header
 	const dataLines = lines.slice(1);
@@ -319,8 +340,16 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 
 	// Create workouts
 	let success = 0;
+	let skipped = 0;
 	for (const workout of workoutMap.values()) {
 		try {
+			// Check if workout with same name and date already exists
+			const workoutKey = `${workout.date}|${workout.name.toLowerCase()}`;
+			if (existingWorkoutKeys.has(workoutKey)) {
+				skipped++;
+				continue;
+			}
+
 			const workoutExercises = Array.from(workout.exercises.entries()).map(
 				([exerciseName, sets]) => {
 					const exercise = exerciseMap.get(exerciseName.toLowerCase())!;
@@ -357,7 +386,7 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 		}
 	}
 
-	return { success, errors };
+	return { success, errors, skipped };
 }
 
 /**
@@ -390,11 +419,11 @@ export async function downloadBlob(
 	if (typeof navigator !== 'undefined' && navigator.share) {
 		try {
 			const file = new File([blob], filename, { type: contentType });
-			
+
 			// Some browsers have navigator.share but can't share files
 			// Try to check if file sharing is supported
 			const canShareFiles = navigator.canShare && navigator.canShare({ files: [file] });
-			
+
 			if (canShareFiles) {
 				try {
 					await navigator.share({
@@ -416,21 +445,23 @@ export async function downloadBlob(
 			console.log('Share API not available:', err);
 		}
 	}
-	
+
 	// Try File System Access API (desktop)
 	// @ts-expect-error - showSaveFilePicker is not in TypeScript types yet
 	if (typeof window !== 'undefined' && window.showSaveFilePicker) {
 		try {
 			const extension = `.${filename.split('.').pop()}`;
 			const description = getFileTypeDescription(extension);
-			
+
 			// @ts-expect-error - showSaveFilePicker is not in TypeScript types yet
 			const handle = await window.showSaveFilePicker({
 				suggestedName: filename,
-				types: [{
-					description,
-					accept: { [contentType]: [extension] }
-				}]
+				types: [
+					{
+						description,
+						accept: { [contentType]: [extension] }
+					}
+				]
 			});
 			const writable = await handle.createWritable();
 			await writable.write(blob);
@@ -445,7 +476,7 @@ export async function downloadBlob(
 			console.log('File System Access API failed:', err);
 		}
 	}
-	
+
 	// Fallback: traditional download
 	// This should work on most browsers including mobile
 	fallbackDownload(blob, filename);
@@ -457,14 +488,14 @@ function fallbackDownload(blob: Blob, filename: string): void {
 	link.href = url;
 	link.download = filename;
 	link.style.display = 'none';
-	
+
 	// Add to DOM, click, and remove
 	document.body.appendChild(link);
-	
+
 	// Use setTimeout to ensure the link is in the DOM
 	setTimeout(() => {
 		link.click();
-		
+
 		// Clean up after a delay
 		setTimeout(() => {
 			document.body.removeChild(link);

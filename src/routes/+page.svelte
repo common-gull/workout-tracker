@@ -16,7 +16,7 @@
 	let selectedExerciseDetail = $state<Exercise | null>(null);
 	let allExercises = $state<Exercise[]>([]);
 	let settings = $state<Settings | null>(null);
-		
+
 	const workoutsQuery = liveQuery(() => db.workouts.where('date').equals(today).toArray());
 	const previousWorkoutsQuery = liveQuery(async () => {
 		const allWorkouts = await db.workouts.orderBy('date').reverse().toArray();

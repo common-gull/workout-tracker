@@ -22,6 +22,7 @@ Squat,Leg exercise targeting quads,https://example.com/squat`;
 
 			expect(result.success).toBe(2);
 			expect(result.errors).toHaveLength(0);
+			expect(result.skipped).toBe(0);
 
 			const exercises = await db.exercises.toArray();
 			expect(exercises).toHaveLength(2);
@@ -38,6 +39,7 @@ Deadlift,Back exercise,`;
 
 			expect(result.success).toBe(1);
 			expect(result.errors).toHaveLength(0);
+			expect(result.skipped).toBe(0);
 
 			const exercises = await db.exercises.toArray();
 			expect(exercises[0].videoLink).toBeUndefined();
@@ -51,6 +53,7 @@ Deadlift,Back exercise,`;
 
 			expect(result.success).toBe(0);
 			expect(result.errors).toHaveLength(1);
+			expect(result.skipped).toBe(0);
 			expect(result.errors[0]).toContain('Exercise name is required');
 		});
 
@@ -62,6 +65,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(0);
 			expect(result.errors).toHaveLength(1);
+			expect(result.skipped).toBe(0);
 			expect(result.errors[0]).toContain('Exercise description is required');
 		});
 
@@ -72,6 +76,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(0);
 			expect(result.errors).toHaveLength(1);
+			expect(result.skipped).toBe(0);
 			expect(result.errors[0]).toContain('empty or has no data rows');
 		});
 	});
@@ -92,6 +97,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(1);
 			expect(result.errors).toHaveLength(0);
+			expect(result.skipped).toBe(0);
 
 			const workouts = await db.workouts.toArray();
 			expect(workouts).toHaveLength(1);
@@ -108,6 +114,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(1);
 			expect(result.errors).toHaveLength(0);
+			expect(result.skipped).toBe(0);
 
 			const workouts = await db.workouts.toArray();
 			expect(workouts[0].exercises[0].sets[0].weight).toBe(100); // No conversion needed
@@ -122,6 +129,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(1);
 			expect(result.errors).toHaveLength(0);
+			expect(result.skipped).toBe(0);
 
 			const workouts = await db.workouts.toArray();
 			expect(workouts[0].exercises[0].sets[0].duration).toBe(1800);
@@ -139,6 +147,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(1);
 			expect(result.errors).toHaveLength(0);
+			expect(result.skipped).toBe(0);
 
 			const workouts = await db.workouts.toArray();
 			expect(workouts[0].exercises[0].sets).toHaveLength(3);
@@ -156,6 +165,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(0);
 			expect(result.errors).toHaveLength(1);
+			expect(result.skipped).toBe(0);
 			expect(result.errors[0]).toContain('Invalid weight unit');
 		});
 
@@ -167,6 +177,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(1);
 			expect(result.errors).toHaveLength(0);
+			expect(result.skipped).toBe(0);
 
 			const workouts = await db.workouts.toArray();
 			expect(workouts[0].exercises[0].sets[0].weight).toBeCloseTo(102.06, 1);
@@ -186,6 +197,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(1);
 			expect(result.errors).toHaveLength(0);
+			expect(result.skipped).toBe(0);
 
 			const workouts = await db.workouts.toArray();
 			expect(workouts[0].exercises[0].sets[0].weight).toBeCloseTo(102.06, 1); // 225 lb converted to kg
@@ -203,6 +215,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(1);
 			expect(result.errors).toHaveLength(0);
+			expect(result.skipped).toBe(0);
 
 			const workouts = await db.workouts.toArray();
 			expect(workouts[0].exercises[0].sets).toHaveLength(3);
@@ -223,6 +236,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(0);
 			expect(result.errors).toHaveLength(1);
+			expect(result.skipped).toBe(0);
 			expect(result.errors[0]).toContain('Invalid date format');
 		});
 
@@ -234,6 +248,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(0);
 			expect(result.errors).toHaveLength(1);
+			expect(result.skipped).toBe(0);
 			expect(result.errors[0]).toContain('Exercise "Deadlift" not found');
 		});
 
@@ -245,6 +260,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(0);
 			expect(result.errors).toHaveLength(1);
+			expect(result.skipped).toBe(0);
 			expect(result.errors[0]).toContain('Invalid weight value');
 		});
 
@@ -256,6 +272,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(0);
 			expect(result.errors).toHaveLength(1);
+			expect(result.skipped).toBe(0);
 			expect(result.errors[0]).toContain('Invalid weight value');
 		});
 
@@ -267,6 +284,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(0);
 			expect(result.errors).toHaveLength(1);
+			expect(result.skipped).toBe(0);
 			expect(result.errors[0]).toContain('Invalid reps value');
 		});
 
@@ -278,6 +296,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(0);
 			expect(result.errors).toHaveLength(1);
+			expect(result.skipped).toBe(0);
 			expect(result.errors[0]).toContain('Invalid set number');
 		});
 
@@ -289,6 +308,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(0);
 			expect(result.errors).toHaveLength(1);
+			expect(result.skipped).toBe(0);
 			expect(result.errors[0]).toContain('Invalid duration value');
 		});
 
@@ -300,6 +320,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(0);
 			expect(result.errors).toHaveLength(1);
+			expect(result.skipped).toBe(0);
 			expect(result.errors[0]).toContain('Invalid duration value');
 		});
 
@@ -311,6 +332,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(0);
 			expect(result.errors).toHaveLength(1);
+			expect(result.skipped).toBe(0);
 			expect(result.errors[0]).toContain('Missing required fields');
 		});
 	});
@@ -333,6 +355,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(1);
 			expect(result.errors).toHaveLength(0);
+			expect(result.skipped).toBe(0);
 
 			const workouts = await db.workouts.toArray();
 			expect(workouts).toHaveLength(1);
@@ -352,6 +375,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(2);
 			expect(result.errors).toHaveLength(0);
+			expect(result.skipped).toBe(0);
 
 			const workouts = await db.workouts.toArray();
 			expect(workouts).toHaveLength(2);
@@ -368,6 +392,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(1);
 			expect(result.errors).toHaveLength(0);
+			expect(result.skipped).toBe(0);
 
 			const workouts = await db.workouts.toArray();
 			expect(workouts[0].exercises).toHaveLength(2);
@@ -385,6 +410,7 @@ Push-ups,,https://example.com/video`;
 
 			expect(result.success).toBe(1);
 			expect(result.errors).toHaveLength(0);
+			expect(result.skipped).toBe(0);
 
 			const workouts = await db.workouts.toArray();
 			expect(workouts[0].exercises[0].sets[0].weight).toBe(100); // kg stays as is
@@ -398,6 +424,7 @@ Push-ups,,https://example.com/video`;
 			const result = await importWorkoutsFromCSV(csv);
 
 			expect(result.success).toBe(1);
+			expect(result.skipped).toBe(0);
 
 			const workouts = await db.workouts.toArray();
 			expect(workouts[0].exercises[0].instructions).toBe('TEMPO - 3111');
@@ -411,8 +438,128 @@ Push-ups,,https://example.com/video`;
 			const result = await importWorkoutsFromCSV(csv);
 
 			expect(result.success).toBe(0);
+			expect(result.skipped).toBe(0);
 			expect(result.errors.length).toBeGreaterThan(0);
 			expect(result.errors[0]).toContain('NonExistent');
+		});
+	});
+
+	describe('Duplicate Handling', () => {
+		it('should skip duplicate exercises with same name', async () => {
+			// First import
+			const csv1 = `name,description,videoLink
+Bench Press,Chest exercise,https://example.com/bench
+Squat,Leg exercise,https://example.com/squat`;
+
+			const result1 = await importExercisesFromCSV(csv1);
+			expect(result1.success).toBe(2);
+			expect(result1.skipped).toBe(0);
+
+			// Second import with one duplicate
+			const csv2 = `name,description,videoLink
+Bench Press,Different description,https://example.com/different
+Deadlift,Back exercise,https://example.com/deadlift`;
+
+			const result2 = await importExercisesFromCSV(csv2);
+			expect(result2.success).toBe(1); // Only Deadlift imported
+			expect(result2.skipped).toBe(1); // Bench Press skipped
+
+			// Verify total exercises
+			const exercises = await db.exercises.toArray();
+			expect(exercises).toHaveLength(3);
+		});
+
+		it('should skip duplicate exercises case-insensitively', async () => {
+			// First import
+			const csv1 = `name,description,videoLink
+Bench Press,Chest exercise,https://example.com/bench`;
+
+			const result1 = await importExercisesFromCSV(csv1);
+			expect(result1.success).toBe(1);
+
+			// Second import with different case
+			const csv2 = `name,description,videoLink
+BENCH PRESS,Different description,https://example.com/different`;
+
+			const result2 = await importExercisesFromCSV(csv2);
+			expect(result2.success).toBe(0);
+			expect(result2.skipped).toBe(1);
+
+			// Verify only one exercise exists
+			const exercises = await db.exercises.toArray();
+			expect(exercises).toHaveLength(1);
+			expect(exercises[0].name).toBe('Bench Press'); // Original name preserved
+		});
+
+		it('should skip duplicate workouts with same name and date', async () => {
+			// Add exercises first
+			await addExercise({ name: 'Bench Press', description: 'Chest exercise' });
+			await addExercise({ name: 'Squat', description: 'Leg exercise' });
+
+			// First import
+			const csv1 = `date,workoutName,exerciseName,setNumber,weight,weightUnit,reps,duration,instructions,notes
+2025-11-03,Upper Body,Bench Press,1,225,lb,5,,TEMPO - 3111,
+2025-11-04,Lower Body,Squat,1,315,lb,5,,,`;
+
+			const result1 = await importWorkoutsFromCSV(csv1);
+			expect(result1.success).toBe(2);
+			expect(result1.skipped).toBe(0);
+
+			// Second import with one duplicate workout
+			const csv2 = `date,workoutName,exerciseName,setNumber,weight,weightUnit,reps,duration,instructions,notes
+2025-11-03,Upper Body,Bench Press,1,230,lb,5,,Different instructions,
+2025-11-05,Upper Body,Bench Press,1,225,lb,5,,,`;
+
+			const result2 = await importWorkoutsFromCSV(csv2);
+			expect(result2.success).toBe(1); // Only 2025-11-05 workout imported
+			expect(result2.skipped).toBe(1); // 2025-11-03 Upper Body skipped
+
+			// Verify total workouts
+			const workouts = await db.workouts.toArray();
+			expect(workouts).toHaveLength(3);
+		});
+
+		it('should allow same workout name on different dates', async () => {
+			// Add exercises first
+			await addExercise({ name: 'Bench Press', description: 'Chest exercise' });
+
+			// Import workouts with same name on different dates
+			const csv = `date,workoutName,exerciseName,setNumber,weight,weightUnit,reps,duration,instructions,notes
+2025-11-03,Upper Body,Bench Press,1,225,lb,5,,,
+2025-11-04,Upper Body,Bench Press,1,230,lb,5,,,
+2025-11-05,Upper Body,Bench Press,1,235,lb,5,,,`;
+
+			const result = await importWorkoutsFromCSV(csv);
+			expect(result.success).toBe(3);
+			expect(result.skipped).toBe(0);
+
+			const workouts = await db.workouts.toArray();
+			expect(workouts).toHaveLength(3);
+		});
+
+		it('should skip duplicate workouts case-insensitively', async () => {
+			// Add exercise first
+			await addExercise({ name: 'Bench Press', description: 'Chest exercise' });
+
+			// First import
+			const csv1 = `date,workoutName,exerciseName,setNumber,weight,weightUnit,reps,duration,instructions,notes
+2025-11-03,Upper Body,Bench Press,1,225,lb,5,,,`;
+
+			const result1 = await importWorkoutsFromCSV(csv1);
+			expect(result1.success).toBe(1);
+
+			// Second import with different case
+			const csv2 = `date,workoutName,exerciseName,setNumber,weight,weightUnit,reps,duration,instructions,notes
+2025-11-03,UPPER BODY,Bench Press,1,230,lb,5,,,`;
+
+			const result2 = await importWorkoutsFromCSV(csv2);
+			expect(result2.success).toBe(0);
+			expect(result2.skipped).toBe(1);
+
+			// Verify only one workout exists
+			const workouts = await db.workouts.toArray();
+			expect(workouts).toHaveLength(1);
+			expect(workouts[0].name).toBe('Upper Body'); // Original name preserved
 		});
 	});
 });

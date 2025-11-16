@@ -92,8 +92,15 @@
 			const text = await file.text();
 			const result = await importExercisesFromCSV(text);
 
-			if (result.success > 0) {
-				showStatus('success', `Successfully imported ${result.success} exercise(s)`);
+			if (result.success > 0 || result.skipped > 0) {
+				const parts = [];
+				if (result.success > 0) {
+					parts.push(`Successfully imported ${result.success} exercise(s)`);
+				}
+				if (result.skipped > 0) {
+					parts.push(`${result.skipped} duplicate(s) skipped`);
+				}
+				showStatus('success', parts.join(', '));
 			}
 
 			if (result.errors.length > 0) {
@@ -122,8 +129,15 @@
 			const text = await file.text();
 			const result = await importWorkoutsFromCSV(text);
 
-			if (result.success > 0) {
-				showStatus('success', `Successfully imported ${result.success} workout(s)`);
+			if (result.success > 0 || result.skipped > 0) {
+				const parts = [];
+				if (result.success > 0) {
+					parts.push(`Successfully imported ${result.success} workout(s)`);
+				}
+				if (result.skipped > 0) {
+					parts.push(`${result.skipped} duplicate(s) skipped`);
+				}
+				showStatus('success', parts.join(', '));
 			}
 
 			if (result.errors.length > 0) {
@@ -159,9 +173,9 @@
 			const blob = await createEncryptedBackup(backupPassword);
 			const timestamp = getTodayLocalDate();
 			const filename = `workout-backup-${timestamp}.backup`;
-			
+
 			await downloadBlob(blob, filename, 'application/octet-stream', 'Workout Backup');
-			
+
 			showBackupPasswordModal = false;
 			showStatus('success', 'Encrypted backup created successfully');
 		} catch (error) {
