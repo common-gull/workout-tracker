@@ -1,6 +1,6 @@
 import '$lib/db/test-setup';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { importExercisesFromCSV, importWorkoutsFromCSV } from './csv';
+import { importExercisesFromCSV, importWorkoutsFromCSV } from './import-export';
 import { db } from '$lib/db/database';
 import { addExercise } from '$lib/db/exercises';
 

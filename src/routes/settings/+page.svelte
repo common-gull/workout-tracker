@@ -7,9 +7,10 @@
 		exportWorkoutsToCSV,
 		importExercisesFromCSV,
 		importWorkoutsFromCSV,
+		importFromJSON,
 		downloadFile,
 		downloadBlob
-	} from '$lib/utils/csv';
+	} from '$lib/utils/import-export';
 	import {
 		createEncryptedBackup,
 		restoreFromEncryptedBackup,
@@ -197,6 +198,53 @@
 		restoreFile = file;
 		restorePassword = '';
 		showRestorePasswordModal = true;
+
+		// Reset input
+		input.value = '';
+	}
+
+	async function handleImportJSON(event: Event) {
+		const input = event.target as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
+
+		try {
+			const text = await file.text();
+			const result = await importFromJSON(text);
+
+			const parts = [];
+			if (result.exercisesSuccess > 0) {
+				parts.push(`${result.exercisesSuccess} exercise(s)`);
+			}
+			if (result.workoutsSuccess > 0) {
+				parts.push(`${result.workoutsSuccess} workout(s)`);
+			}
+
+			if (parts.length > 0) {
+				let message = `Successfully imported ${parts.join(' and ')}`;
+				if (result.exercisesSkipped > 0 || result.workoutsSkipped > 0) {
+					const skipped = [];
+					if (result.exercisesSkipped > 0) skipped.push(`${result.exercisesSkipped} exercise(s)`);
+					if (result.workoutsSkipped > 0) skipped.push(`${result.workoutsSkipped} workout(s)`);
+					message += `. Skipped ${skipped.join(' and ')}`;
+				}
+				showStatus('success', message);
+			} else if (result.exercisesSkipped > 0 || result.workoutsSkipped > 0) {
+				showStatus('error', 'No new data imported. All items were duplicates or invalid.');
+			}
+
+			if (result.errors.length > 0) {
+				showStatus(
+					'error',
+					`Import completed with errors:\n${result.errors.slice(0, 5).join('\n')}${result.errors.length > 5 ? `\n... and ${result.errors.length - 5} more errors` : ''}`
+				);
+			}
+		} catch (error) {
+			showStatus(
+				'error',
+				`Failed to import JSON: ${error instanceof Error ? error.message : 'Unknown error'}`
+			);
+		}
 
 		// Reset input
 		input.value = '';
@@ -415,6 +463,29 @@
 				<p class="text-xs text-gray-500 dark:text-gray-400">
 					CSV format: Exercises (name, description, videoLink) | Workouts (date, workoutName,
 					exerciseName, setNumber, weight, reps, notes)
+				</p>
+			</div>
+		</section>
+
+		<!-- JSON Import -->
+		<section
+			class="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+		>
+			<h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100">JSON Import</h2>
+			<div class="space-y-4">
+				<div>
+					<p class="mb-3 text-sm text-gray-600 dark:text-gray-400">
+						Import exercises and workouts from JSON format
+					</p>
+					<label
+						class="cursor-pointer rounded-lg border border-purple-600 bg-purple-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-purple-700 inline-block dark:border-purple-500 dark:bg-purple-500 dark:hover:bg-purple-600"
+					>
+						Import from JSON
+						<input type="file" accept=".json" onchange={handleImportJSON} class="hidden" />
+					</label>
+				</div>
+				<p class="text-xs text-gray-500 dark:text-gray-400">
+					Expected format: &#123;"exercises": [...], "workouts": [...]&#125;
 				</p>
 			</div>
 		</section>

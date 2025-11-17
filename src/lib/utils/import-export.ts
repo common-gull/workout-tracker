@@ -182,6 +182,9 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 	// Get all exercises to validate exercise names
 	const exercises = await getAllExercises();
 	const exerciseMap = new Map(exercises.map((e) => [e.name.toLowerCase(), e]));
+	const exerciseNameToId = new Map(
+		exercises.filter((e) => e.id).map((e) => [e.name.toLowerCase(), e.id!])
+	);
 
 	// Get existing workouts to check for duplicates
 	const existingWorkouts = await getAllWorkouts();
@@ -332,7 +335,7 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 				duration,
 				instructions: instructions?.trim(),
 				notes: notes?.trim()
-			});
+			} as WorkoutSetData);
 		} catch (error) {
 			errors.push(`Line ${lineNum}: ${error instanceof Error ? error.message : 'Unknown error'}`);
 		}
@@ -350,27 +353,13 @@ export async function importWorkoutsFromCSV(csvContent: string): Promise<{
 				continue;
 			}
 
-			const workoutExercises = Array.from(workout.exercises.entries()).map(
-				([exerciseName, sets]) => {
-					const exercise = exerciseMap.get(exerciseName.toLowerCase())!;
+			const workoutExercises = await buildWorkoutExercises(workout.exercises, exerciseNameToId);
 
-					// Sort sets by set number
-					sets.sort((a, b) => a.setNumber - b.setNumber);
-
-					return {
-						exerciseId: exercise.id!,
-						exerciseName: exercise.name,
-						sets: sets.map((s) => ({
-							weight: s.weight,
-							reps: s.reps,
-							duration: s.duration,
-							completed: false
-						})),
-						instructions: sets[0]?.instructions,
-						notes: sets[0]?.notes
-					};
-				}
-			);
+			if (workoutExercises.length === 0) {
+				errors.push(`Workout "${workout.name}" on ${workout.date}: No valid exercises found`);
+				skipped++;
+				continue;
+			}
 
 			await addWorkout({
 				name: workout.name,
@@ -526,4 +515,270 @@ function escapeCsvValue(value: string): string {
 	}
 
 	return value;
+}
+
+/**
+ * Helper function to convert weight to kg based on unit
+ */
+function convertWeightToKg(weight: number, unit: 'metric' | 'imperial'): number {
+	if (unit === 'imperial') {
+		return lbsToKg(weight);
+	}
+	return weight;
+}
+
+/**
+ * Common interface for workout set data
+ */
+interface WorkoutSetData {
+	weight: number; // Already in kg
+	reps: number;
+	duration?: number;
+	setNumber: number;
+	instructions?: string;
+	notes?: string;
+}
+
+/**
+ * Build workout exercises from grouped set data
+ */
+async function buildWorkoutExercises(
+	exerciseSets: Map<string, WorkoutSetData[]>,
+	exerciseNameToId: Map<string, number>
+): Promise<
+	{
+		exerciseId: number;
+		exerciseName: string;
+		sets: Array<{ weight: number; reps: number; duration?: number; completed: boolean }>;
+		instructions?: string;
+		notes?: string;
+	}[]
+> {
+	const workoutExercises = [];
+
+	for (const [exerciseName, sets] of exerciseSets) {
+		const exerciseId = exerciseNameToId.get(exerciseName.toLowerCase());
+		if (!exerciseId) {
+			continue; // Skip exercises not found
+		}
+
+		// Sort sets by set number
+		sets.sort((a, b) => a.setNumber - b.setNumber);
+
+		// Get instructions and notes from first set
+		const instructions = sets[0]?.instructions?.trim() || undefined;
+		const notes = sets[0]?.notes?.trim() || undefined;
+
+		workoutExercises.push({
+			exerciseId,
+			exerciseName,
+			sets: sets.map((s) => ({
+				weight: s.weight,
+				reps: s.reps,
+				duration: s.duration,
+				completed: false
+			})),
+			instructions,
+			notes
+		});
+	}
+
+	return workoutExercises;
+}
+
+export interface JSONExercise {
+	name: string;
+	description: string;
+	videoLink: string;
+}
+
+export interface JSONWorkout {
+	date: string;
+	workoutName: string;
+	exerciseName: string;
+	setNumber: number;
+	weight: number;
+	weightUnit: string;
+	reps: number;
+	duration: string;
+	instructions: string;
+	notes: string;
+}
+
+export interface JSONImportData {
+	exercises: JSONExercise[];
+	workouts: JSONWorkout[];
+}
+
+export async function importFromJSON(jsonContent: string): Promise<{
+	exercisesSuccess: number;
+	workoutsSuccess: number;
+	exercisesSkipped: number;
+	workoutsSkipped: number;
+	errors: string[];
+}> {
+	const errors: string[] = [];
+	let exercisesSuccess = 0;
+	let exercisesSkipped = 0;
+	let workoutsSuccess = 0;
+	let workoutsSkipped = 0;
+
+	try {
+		const data: JSONImportData = JSON.parse(jsonContent);
+
+		if (!data.exercises || !data.workouts) {
+			throw new Error('Invalid JSON format. Expected "exercises" and "workouts" arrays.');
+		}
+
+		// Get existing exercises to check for duplicates
+		const existingExercises = await getAllExercises();
+		const existingExerciseNames = new Set(
+			existingExercises.map((e) => e.name.toLowerCase().trim())
+		);
+
+		// Import exercises
+		for (const exerciseData of data.exercises) {
+			try {
+				const name = exerciseData.name?.trim();
+				if (!name) {
+					errors.push('Skipped exercise with missing name');
+					exercisesSkipped++;
+					continue;
+				}
+
+				// Check for duplicates
+				if (existingExerciseNames.has(name.toLowerCase())) {
+					exercisesSkipped++;
+					continue;
+				}
+
+				await addExercise({
+					name,
+					description: exerciseData.description?.trim() || '',
+					videoLink: exerciseData.videoLink?.trim() || undefined
+				});
+
+				existingExerciseNames.add(name.toLowerCase());
+				exercisesSuccess++;
+			} catch (error) {
+				errors.push(
+					`Failed to import exercise "${exerciseData.name}": ${error instanceof Error ? error.message : String(error)}`
+				);
+			}
+		}
+
+		// Get all exercises after import for ID mapping
+		const allExercises = await getAllExercises();
+		const exerciseNameToId = new Map<string, number>();
+		for (const exercise of allExercises) {
+			if (exercise.id) {
+				exerciseNameToId.set(exercise.name.toLowerCase().trim(), exercise.id);
+			}
+		}
+
+		// Get existing workouts to check for duplicates
+		const existingWorkouts = await getAllWorkouts();
+		const existingWorkoutKeys = new Set(
+			existingWorkouts.map((w) => `${w.date}|${w.name.toLowerCase()}`)
+		);
+
+		// Group workouts by date and workout name
+		const workoutGroups = new Map<
+			string,
+			Map<string, Array<{ exerciseName: string; data: JSONWorkout }>>
+		>();
+
+		for (const workoutData of data.workouts) {
+			const date = workoutData.date?.trim();
+			const workoutName = workoutData.workoutName?.trim();
+			const exerciseName = workoutData.exerciseName?.trim();
+
+			if (!date || !workoutName || !exerciseName) {
+				errors.push('Skipped workout row with missing date, workoutName, or exerciseName');
+				workoutsSkipped++;
+				continue;
+			}
+
+			if (!workoutGroups.has(date)) {
+				workoutGroups.set(date, new Map());
+			}
+			const dateGroup = workoutGroups.get(date)!;
+
+			if (!dateGroup.has(workoutName)) {
+				dateGroup.set(workoutName, []);
+			}
+			dateGroup.get(workoutName)!.push({ exerciseName, data: workoutData });
+		}
+
+		// Import workouts
+		for (const [date, workoutMap] of workoutGroups) {
+			for (const [workoutName, exerciseList] of workoutMap) {
+				try {
+					// Check if workout with same name and date already exists
+					const workoutKey = `${date}|${workoutName.toLowerCase()}`;
+					if (existingWorkoutKeys.has(workoutKey)) {
+						workoutsSkipped++;
+						continue;
+					}
+
+					// Group by exercise name and convert to common format
+					const exerciseSets = new Map<string, WorkoutSetData[]>();
+					for (const { exerciseName, data } of exerciseList) {
+						if (!exerciseSets.has(exerciseName)) {
+							exerciseSets.set(exerciseName, []);
+						}
+						exerciseSets.get(exerciseName)!.push({
+							weight: convertWeightToKg(data.weight, data.weightUnit === 'kg' ? 'metric' : 'imperial'),
+							reps: data.reps || 0,
+							duration: data.duration ? parseInt(data.duration) : undefined,
+							setNumber: data.setNumber,
+							instructions: data.instructions?.trim(),
+							notes: data.notes?.trim()
+						});
+					}
+
+					// Build workout exercises using shared function
+					const workoutExercises = await buildWorkoutExercises(exerciseSets, exerciseNameToId);
+
+					if (workoutExercises.length === 0) {
+						errors.push(`Skipped workout "${workoutName}" on ${date}: No valid exercises found`);
+						workoutsSkipped++;
+						continue;
+					}
+
+					// Add workout to database
+					await addWorkout({
+						name: workoutName,
+						date,
+						exercises: workoutExercises
+					});
+
+					workoutsSuccess++;
+				} catch (error) {
+					errors.push(
+						`Failed to import workout "${workoutName}" on ${date}: ${error instanceof Error ? error.message : String(error)}`
+					);
+					workoutsSkipped++;
+				}
+			}
+		}
+
+		return {
+			exercisesSuccess,
+			exercisesSkipped,
+			workoutsSuccess,
+			workoutsSkipped,
+			errors
+		};
+	} catch (error) {
+		return {
+			exercisesSuccess: 0,
+			exercisesSkipped: 0,
+			workoutsSuccess: 0,
+			workoutsSkipped: 0,
+			errors: [
+				`Failed to parse JSON: ${error instanceof Error ? error.message : String(error)}`
+			]
+		};
+	}
 }
